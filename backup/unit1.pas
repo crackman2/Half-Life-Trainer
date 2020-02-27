@@ -427,7 +427,7 @@ begin
                 '-- How to use --' + sLineBreak +
                 '1. Start Half-life (Tested on Steam version, other versions may or may not work)' + sLineBreak +
                 '2. Start the Trainer (If the trainer is already running, click on "Reinitialize")' + sLineBreak +
-                '3. Adjust Trainer settings to your liking.' + sLineBreak + sLineBreak +
+                '3. Adjust Trainer settings to you liking.' + sLineBreak + sLineBreak +
                 '-- FAQ --' + sLineBreak +
                 'Q: Does it work in multiplayer?' + sLineBreak +
                 'A: No. If you try you will get VAC banned.' + sLineBreak + sLineBreak +
