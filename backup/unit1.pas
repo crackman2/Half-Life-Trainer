@@ -35,7 +35,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, ExtCtrls, jwatlhelp32, Windows;
+  StdCtrls, ExtCtrls, jwatlhelp32, Windows,LCLIntf;
 
 type
 
@@ -48,14 +48,18 @@ type
     CheckBoxInfAmmo: TCheckBox;
     CheckBoxEnableAPRegen: TCheckBox;
     CheckBoxEnableHPRegen: TCheckBox;
+    Image1: TImage;
+    Image2: TImage;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
+    LabelStatus: TLabel;
     LabelAPRate: TLabel;
     LabelMaxHP: TLabel;
     LabelMaxAP: TLabel;
     Label5: TLabel;
     LabelHPRate: TLabel;
+    TimerGameStatus: TTimer;
     TimerGetRapidFireAddress: TTimer;
     TimerRegen: TTimer;
     TrackBarAPRate: TTrackBar;
@@ -69,6 +73,9 @@ type
     procedure CheckBoxProperRapidfireChange(Sender: TObject);
 
     procedure FormCreate(Sender: TObject);
+    procedure Image1Click(Sender: TObject);
+    procedure Image2Click(Sender: TObject);
+    procedure TimerGameStatusTimer(Sender: TObject);
     procedure TimerRegenTimer(Sender: TObject);
     procedure TrackBarAPRateChange(Sender: TObject);
     procedure TrackBarHPRateChange(Sender: TObject);
@@ -206,14 +213,27 @@ end;
      Result:= pe32.th32ProcessID;
  end;
 
+procedure InitAddresses();
+var
+      ModBase: DWORD;
+begin
+  ModBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hw.dll'));
+  ReadProcessMemory(hProcess, Pointer(ModBase + $658480), @Brendan.dwAddHP,   // X
+    sizeof(Brendan.dwAddHP), nil);
+  Brendan.dwAddHP := Brendan.dwAddHP + $1E0; //X
+  Brendan.dwAddAP := Brendan.dwAddHP + $5C;  //X
 
-
+  //unnötig aber gerade kb das besser zu machen
+  dwHWBase := ModBase;
+  //Infammo in HL.dll
+  dwHLBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hl.dll'));
+  dwCLIENTBase := DWORD(GetModuleBaseAddress(dwProcessId, 'client.dll'));
+end;
 
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);// ENTRYYYYYYYYY
 var
-  ModBase: DWORD;
   GameFound: boolean = False;
   temp: DWORD;
 begin
@@ -237,53 +257,51 @@ begin
     hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, dwProcessId);
     if (hProcess = $0000) and (GameFound = False) then
     begin
+      Form1.LabelStatus.Caption:= 'Status: Game not found. Start Half-life!';
+      Form1.LabelStatus.Font.Color:= $0000DD;
       ShowMessage('Waiting for game...');
       GameFound := True;
     end;
     Sleep(100);
   end;
+  Form1.LabelStatus.Caption:= 'Status: Game found!';
+  Form1.LabelStatus.Font.Color:= $00DD00;
+
+  Form1.TimerGameStatus.Enabled:=true;
 
   //===HP and AP Addresses===
-  ModBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hw.dll'));
-  ReadProcessMemory(hProcess, Pointer(ModBase + $658480), @Brendan.dwAddHP,   // X
-    sizeof(Brendan.dwAddHP), nil);
-  Brendan.dwAddHP := Brendan.dwAddHP + $1E0; //X
-  Brendan.dwAddAP := Brendan.dwAddHP + $5C;  //X
-
-
-  //===Bhop midair check===
-  //"hw.dll"+007E6478// Midair Value
-  temp := ReadDword(ModBase + $7E6478) + $6BC;
-  temp := ReadDword(temp) + $274;
-  temp := ReadDword(temp) + $7e4;
-  temp := ReadDword(temp) + $3a0;
-  //Brendan.dwAddMidair := ReadDword(temp) + $5c;
-  Brendan.dwAddMidair := $18D424;
-
-  //===Rapid fire===
-  Brendan.dwAddRapidfire := GetRapidFireAddress(ModBase);
-  {
-  temp := 0;
-  temp := ReadDword(ModBase + $A20A4C) + $EC;
-  temp := ReadDword(temp) + $78;
-  temp := ReadDword(temp) + $6A8;
-  temp := ReadDword(temp) + $4C8;
-  Brendan.dwAddRapidfire := ReadDword(temp) + $8C;
-  }
-
-  //unnötig aber gerade kb das besser zu machen
-  dwHWBase := ModBase;
-
-
-  //Infammo in HL.dll
-  dwHLBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hl.dll'));
-  dwCLIENTBase := DWORD(GetModuleBaseAddress(dwProcessId, 'client.dll'));
+  InitAddresses();
 
   if ReIniter then
   begin
     ShowMessage('Done.');
   end;
 
+end;
+
+procedure TForm1.Image1Click(Sender: TObject);
+begin
+  OpenURL('https://github.com/crackman2/Half-Life-Trainer');
+end;
+
+procedure TForm1.Image2Click(Sender: TObject);
+begin
+  OpenURL('https://www.youtube.com/user/pombenenge');
+end;
+
+procedure TForm1.TimerGameStatusTimer(Sender: TObject);
+begin
+  dwProcessId:= GetProcId('hl.exe');
+  //Form1.LabelStatus.Caption:= 'ID: ' + IntToStr(dwProcessId);
+  if dwProcessId = 6619182 then
+  begin
+     Form1.LabelStatus.Caption:='Status: Game not running anymore!';
+     Form1.LabelStatus.Font.Color := $0000DD;
+  end
+  else
+  begin
+    InitAddresses();
+  end;
 end;
 
 
@@ -433,7 +451,8 @@ begin
                 'by pombenenge (on YouTube)' + sLineBreak +
                 'Last Updated: 2020-02-27' + sLineBreak +
                 'hl.exe version: 1.1.1.1' + sLineBreak + sLineBreak +
-                'WARNING: The Trainer may cause crashes. Save often' + sLineBreak + sLineBreak +
+                'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo' + sLineBreak + sLineBreak +
+                'WARNING: The Trainer may cause crashes. Save often.' + sLineBreak + sLineBreak +
                 '-- How to use --' + sLineBreak +
                 '1. Start Half-life (Tested on Steam version, other versions may or may not work)' + sLineBreak +
                 '2. Start the Trainer (If the trainer is already running, click on "Reinitialize")' + sLineBreak +
@@ -446,26 +465,13 @@ begin
                 '   1. You probably need the Steam version of Half-Life.' + sLineBreak +
                 '   2. Run the Trainer as administrator.' + sLineBreak +
                 '   3. Check the instructions above and make sure you are doing it right.' + sLineBreak +
-                '   4. The hack may be outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
+                '   4. The Trainer may be outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
                 '       contact me)' + sLineBreak + sLineBreak +
+                'Click on the icons for GitHub and Youtube links' + sLineBreak + sLineBreak +
                 'Have fun!'
                 );
 end;
 
-
-
-
-
-
-procedure TForm1.TimerGetRapidFireAddressTimer(Sender: TObject);
-begin
-  Brendan.dwAddRapidfire := GetRapidFireAddress(dwHWBase);
-end;
-
-procedure TForm1.TimerRapidfireTimer(Sender: TObject);
-begin
-  WriteFloat(-1, Brendan.dwAddRapidfire);
-end;
 
 procedure TForm1.TimerRegenTimer(Sender: TObject);
 begin
