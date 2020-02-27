@@ -51,17 +51,13 @@ type
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
-    Label4: TLabel;
-    LabelRapidfireRefresh: TLabel;
     LabelAPRate: TLabel;
     LabelMaxHP: TLabel;
     LabelMaxAP: TLabel;
     Label5: TLabel;
     LabelHPRate: TLabel;
     TimerGetRapidFireAddress: TTimer;
-    TimerRapidfire: TTimer;
     TimerRegen: TTimer;
-    TrackBarRapidfireRefresh: TTrackBar;
     TrackBarAPRate: TTrackBar;
     TrackBarMaxHP: TTrackBar;
     TrackBarMaxAP: TTrackBar;
@@ -73,15 +69,11 @@ type
     procedure CheckBoxProperRapidfireChange(Sender: TObject);
 
     procedure FormCreate(Sender: TObject);
-    procedure TimerBhopTimer(Sender: TObject);
-    procedure TimerGetRapidFireAddressTimer(Sender: TObject);
-    procedure TimerRapidfireTimer(Sender: TObject);
     procedure TimerRegenTimer(Sender: TObject);
     procedure TrackBarAPRateChange(Sender: TObject);
     procedure TrackBarHPRateChange(Sender: TObject);
     procedure TrackBarMaxAPChange(Sender: TObject);
     procedure TrackBarMaxHPChange(Sender: TObject);
-    procedure TrackBarRapidfireRefreshChange(Sender: TObject);
   private
     { private declarations }
   public
@@ -118,6 +110,8 @@ var
   dwHWBase: DWORD;
   dwHLBase: DWORD;
   dwCLIENTBase: DWORD;
+  bSMGNadeOriginalCode:array[0..5] of Byte;
+  i:integer; //for loop indexer
 
 
 
@@ -126,9 +120,6 @@ implementation
 
 {$R *.lfm}
 
-//AU3_API void WINAPI AU3_Send(LPCWSTR szSendText, int nMode = 0);
-function AU3_Send(szSendText: LPCWSTR; nMode: int32 = 0): integer;
-  stdcall; external 'AutoItX3.dll';
 
 function GetModuleBaseAddress(hProcID: cardinal; lpModName: PChar): Pointer;
 var
@@ -163,6 +154,11 @@ end;
 procedure WriteByte(Value: byte; Address: DWORD);
 begin
   WriteProcessMemory(hProcess, Pointer(Address), @Value, sizeof(Value), nil);
+end;
+
+function ReadByte(Address: DWORD):Byte;
+begin
+  ReadProcessMemory(hProcess, Pointer(Address), @Result, sizeof(Result), nil);
 end;
 
 function ReadFloat(Address: DWORD): single;
@@ -367,6 +363,12 @@ begin
     WriteByte($90, dwHLBase + $632E8);
     WriteByte($90, dwHLBase + $632E9);
     //rapid smg nades  X
+
+    for i:= 0 to 5 do
+    begin
+      bSMGNadeOriginalCode[i] := ReadByte(dwHLBase + $4BCE3 + i);
+    end;
+
     WriteByte($90, dwHLBase + $4BCE3);
     WriteByte($90, dwHLBase + $4BCE4);
     WriteByte($90, dwHLBase + $4BCE5);
@@ -389,12 +391,19 @@ begin
     WriteByte($74, dwHLBase + $632E8);
     WriteByte($08, dwHLBase + $632E9);
 
+    {
     WriteByte($D8, dwHLBase + $4BCE3);
     WriteByte($05, dwHLBase + $4BCE4);
     WriteByte($A0, dwHLBase + $4BCE5);
     WriteByte($35, dwHLBase + $4BCE6);
-    WriteByte($19, dwHLBase + $4BCE7);
-    WriteByte($27, dwHLBase + $4BCE9);
+    WriteByte($F1, dwHLBase + $4BCE7);
+    WriteByte($07, dwHLBase + $4BCE9);
+    }
+
+    for i:= 0 to 5 do
+    begin
+      WriteByte(bSMGNadeOriginalCode[i], dwHLBase + $4BCE3 + i)
+    end;
 
     //WriteByte($89, dwCLIENTBase + $1BF66);
     //WriteByte($97, dwCLIENTBase + $1BF67);
@@ -421,23 +430,24 @@ end;
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin
   ShowMessage(  'Half-Life Trainer v1.1' + sLineBreak +
-                'by pombenenge' + sLineBreak +
+                'by pombenenge (on YouTube)' + sLineBreak +
                 'Last Updated: 2020-02-27' + sLineBreak +
                 'hl.exe version: 1.1.1.1' + sLineBreak + sLineBreak +
+                'WARNING: The Trainer may cause crashes. Save often' + sLineBreak + sLineBreak +
                 '-- How to use --' + sLineBreak +
                 '1. Start Half-life (Tested on Steam version, other versions may or may not work)' + sLineBreak +
                 '2. Start the Trainer (If the trainer is already running, click on "Reinitialize")' + sLineBreak +
-                '3. Adjust Trainer settings to you liking.' + sLineBreak + sLineBreak +
+                '3. Adjust Trainer settings to your liking.' + sLineBreak + sLineBreak +
                 '-- FAQ --' + sLineBreak +
                 'Q: Does it work in multiplayer?' + sLineBreak +
-                'A: No. If you try you will get VAC banned.' + sLineBreak + sLineBreak +
+                'A: No. If you try you will get VAC banned. Seriously, do NOT do it.' + sLineBreak + sLineBreak +
                 'Q: Nothing happens? Why?' + sLineBreak +
                 'A: There can be multiple reasons why it does not work.' + sLineBreak +
                 '   1. You probably need the Steam version of Half-Life.' + sLineBreak +
                 '   2. Run the Trainer as administrator.' + sLineBreak +
                 '   3. Check the instructions above and make sure you are doing it right.' + sLineBreak +
-                '   4. The hack is outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
-                '      contact me)' + sLineBreak + sLineBreak +
+                '   4. The hack may be outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
+                '       contact me)' + sLineBreak + sLineBreak +
                 'Have fun!'
                 );
 end;
@@ -445,21 +455,7 @@ end;
 
 
 
-procedure TForm1.TimerBhopTimer(Sender: TObject);
-begin
-  //Bhop Script
-  Brendan.fMidair := ReadFloat(Brendan.dwAddMidair);
-  if (GetAsyncKeyState($20) < 0) and (Brendan.fMidair = 0) then
-  begin
-    ///keybd_event(VK_P, 0, 0, 0);
-    //PostMessage(hFenster, WM_KEYDOWN, VK_P, 0);
-    AU3_Send('p');
-    Sleep(10);
-    //PostMessage(hFenster, WM_KEYUP, VK_P, 0);
-    //keybd_event(VK_P, 0, KEYEVENTF_KEYUP, 0);
-  end;
 
-end;
 
 procedure TForm1.TimerGetRapidFireAddressTimer(Sender: TObject);
 begin
@@ -528,12 +524,6 @@ begin
   Brendan.fMaxHP := TrackBarMaxHP.Position;
   LabelMaxHP.Caption := IntToStr(TrackBarMaxHP.Position - 1);
 
-end;
-
-procedure TForm1.TrackBarRapidfireRefreshChange(Sender: TObject);
-begin
-  LabelRapidfireRefresh.Caption := IntToStr(TrackBarRapidfireRefresh.Position);
-  TimerRapidfire.Interval := TrackBarRapidfireRefresh.Position;
 end;
 
 
