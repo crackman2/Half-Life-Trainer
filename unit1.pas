@@ -8,26 +8,27 @@ interface
 {
 ///////////////////////NOTIZEN///////////////////////
 -------
-       hl.dll+6D5C3 - 4A                    - dec edx //DEC 357 AMMO X
-       hl.dll+3A616 - 48                    - dec eax //DEC Pistol AMMO X
-       hl.dll+4B990 - 4A                    - dec edx //DEC SMG AMMO   X
-       hl.dll+76267 - 4A                    - dec edx //DEC Shotgun AMMO X
-       hl.dll+1DF4A - 48                    - dec eax //DEC Crossbow AMMO X
-       hl.dll+6F74A - 49                    - dec ecx //DEC Rocket AMMO   X
-       hl.dll+25DDA - 2B C2                 - sub eax,edx //DEC Egon  X
-       hl.dll+3BD33 - 4F                    - dec edi //DEC Hornet AMMO  X
-       hl.dll+352C7 - 4F                    - dec edi //DEC Nades  X
-       hl.dll+705AF - 49                    - dec ecx //DEC Satchel  X
-       hl.dll+86371 - 49                    - dec ecx //DEC Mines X
-       hl.dll+7BFF2 - 49                    - dec ecx //DEC Snarks  X
-       hl.dll+4BBE2 - 4F                    - dec edi //DEC SMG Launcher X
-       hl.dll+2FFE1 - 83 C1 FE              - add ecx,-02//DEC Gauss  X
-       hl.dll+30115 - 49                    - dec ecx //DEC Gauss   X
-       hl.dll+30264 - 49                    - dec ecx //DEC Gauss
-       hl.dll+632E8 - 74 08                 - je hl.dll+632F2 //inf firerate  X
-       hl.dll+3C59C - 49                    - dec ecx //Hornet gun rechtsklick
-       hl.dll+4BCE3 - D8 05 A035A20A        - fadd dword ptr [hl.dll+A35A0]//smgnade X
-       client.dll+1BF66 - 89 97 90000000        - mov [edi+00000090],edx//smgnade
+       hl.dll+6D5F3 - 4A                    - dec edx //DEC 357 AMMO X          BROKEN fixed
+       hl.dll+3A616 - 48                    - dec eax //DEC Pistol AMMO
+       hl.dll+4B990 - 4A                    - dec edx //DEC SMG AMMO
+       hl.dll+76297 - 4A                    - dec edx //DEC Shotgun AMMO        BROKEN fixed
+       hl.dll+764DA - 83 C2 FE              - add edx,-02 // Shotgun doppelschuss fixed
+       hl.dll+1DF4A - 48                    - dec eax //DEC Crossbow AMMO
+       hl.dll+6F77A - 49                    - dec ecx //DEC Rocket AMMO         CRASH fixed
+       hl.dll+25DDA - 2B C2                 - sub eax,edx //DEC Egon
+       hl.dll+3BD33 - 4F                    - dec edi //DEC Hornet AMMO
+       hl.dll+352C7 - 4F                    - dec edi //DEC Nades
+       hl.dll+705DF - 49                    - dec ecx //DEC Satchel             CRASH fixed
+       hl.dll+863A1 - 49                    - dec ecx //DEC Mines               BROKEN fixed
+       hl.dll+7C022 - 49                    - dec ecx //DEC Snarks              BROKEN fixed
+       hl.dll+4BBE2 - 4F                    - dec edi //DEC SMG Launcher
+       hl.dll+2FFE1 - 83 C1 FE              - add ecx,-02//DEC Gauss            RIGHT CLICK BROKEN fixed
+       hl.dll+30115 - 49                    - dec ecx //DEC Gauss               RIGHT CLICK BROKEN fixed
+       hl.dll+30264 - 49                    - dec ecx //DEC Gauss Right click   RIGHT CLICK BROKEN fixed
+       hl.dll+63318 - 74 08                 - je hl.dll+63322 //inf firerate
+       hl.dll+3C63C - 49                    - dec ecx //Hornet gun rechtsklick  BROKEN
+       hl.dll+4BCE3 - D8 05 A035A20A        - fadd dword ptr [hl.dll+A35A0]//smgnade
+       client.dll+1BF86 - 89 97 90000000        - mov [edi+00000090],edx//smgnade
 
 
 }
@@ -128,6 +129,7 @@ implementation
 {$R *.lfm}
 
 
+
 function GetModuleBaseAddress(hProcID: cardinal; lpModName: PChar): Pointer;
 var
   hSnap: cardinal;
@@ -217,8 +219,9 @@ procedure InitAddresses();
 var
       ModBase: DWORD;
 begin
+    /// PATCH: "hw.dll"+007F6304  {   1E0 }
   ModBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hw.dll'));
-  ReadProcessMemory(hProcess, Pointer(ModBase + $658480), @Brendan.dwAddHP,   // X
+  ReadProcessMemory(hProcess, Pointer(ModBase + $7F6304), @Brendan.dwAddHP,   // X
     sizeof(Brendan.dwAddHP), nil);
   Brendan.dwAddHP := Brendan.dwAddHP + $1E0; //X
   Brendan.dwAddAP := Brendan.dwAddHP + $5C;  //X
@@ -317,49 +320,58 @@ begin
   if CheckBoxInfAmmo.Checked then
   begin
     //NOPping dec opcode (or sub for the egon)
-    WriteByte($90, dwHLBase + $6D5C3); //357 X
+
+    WriteByte($90, dwHLBase + $6D5F3); //357 X  FIXED
     WriteByte($90, dwHLBase + $3A616); //Pistol X
     WriteByte($90, dwHLBase + $4B990); //SMG X
-    WriteByte($90, dwHLBase + $76267); //Shotgun X
+    WriteByte($90, dwHLBase + $76297); //Shotgun X FIXED 764DA
+    WriteByte($90, dwHLBase + $764DA); //Shotgun Doppelschuss  FIXED
+    WriteByte($90, dwHLBase + $764DA+1); //Shotgun Doppelschuss
+    WriteByte($90, dwHLBase + $764DA+2); //Shotgun Doppelschuss
     WriteByte($90, dwHLBase + $1DF4A); //Crossbow X
-    WriteByte($90, dwHLBase + $6F74A); //Rockets X
+    WriteByte($90, dwHLBase + $6F77A); //Rockets X
     WriteByte($90, dwHLBase + $25DDA); //Egon 1 X
     WriteByte($90, dwHLBase + $25DDB); //Egon 2 X
     // hl.dll+3C59C - 49                    - dec ecx //Hornet gun rechtsklick
     WriteByte($90, dwHLBase + $3BD33); //Hornet 2 X
-    //WriteByte($90, dwHLBase + $3C59C); //Hornet rechtsklick
+    WriteByte($90, dwHLBase + $3C63C); //Hornet rechtsklick
     WriteByte($90, dwHLBase + $352C7); //Nades   X
-    WriteByte($90, dwHLBase + $705AF); //Satchel X
-    WriteByte($90, dwHLBase + $86371); //Mines X
-    WriteByte($90, dwHLBase + $7BFF2); //Snarks X
+    WriteByte($90, dwHLBase + $705DF); //Satchel X
+    WriteByte($90, dwHLBase + $863A1); //Mines X
+    WriteByte($90, dwHLBase + $7C022); //Snarks X
     WriteByte($90, dwHLBase + $4BBE2); //SMG Launcher
     WriteByte($90, dwHLBase + $2FFE1); //Gauss
     WriteByte($90, dwHLBase + $2FFE2); //Gauss
     WriteByte($90, dwHLBase + $2FFE3); //Gauss
     WriteByte($90, dwHLBase + $30115); //Gauss
+    WriteByte($90, dwHLBase + $30264); //Gauss Right Click
     //WriteByte($90, dwHLBase + $301B4); //Gauss
   end
   else
   begin
-    WriteByte($4A, dwHLBase + $6D5C3); //357 X
+    WriteByte($4A, dwHLBase + $6D5F3); //357 X
     WriteByte($48, dwHLBase + $3A616); //Pistol X
     WriteByte($4A, dwHLBase + $4B990); //SMG  X
-    WriteByte($4A, dwHLBase + $76267); //Shotgun X
+    WriteByte($4A, dwHLBase + $76297); //Shotgun X
+    WriteByte($83, dwHLBase + $764DA); //Shotgun Doppelschuss  83 C2 FE
+    WriteByte($C2, dwHLBase + $764DA+1); //Shotgun Doppelschuss
+    WriteByte($FE, dwHLBase + $764DA+2); //Shotgun Doppelschuss
     WriteByte($48, dwHLBase + $1DF4A); //Crossbow X
-    WriteByte($49, dwHLBase + $6F74A); //Rockets X
+    WriteByte($49, dwHLBase + $6F77A ); //Rockets X
     WriteByte($2B, dwHLBase + $25DDA); //Egon 1 X
     WriteByte($C2, dwHLBase + $25DDB); //Egon 2 X
     WriteByte($4F, dwHLBase + $3BD33); //Hornet 2 X
-    //WriteByte($49, dwHLBase + $3C59C);  Hornet Rightclick
+    WriteByte($49, dwHLBase + $3C63C);  //Hornet Rightclick
     WriteByte($4F, dwHLBase + $352C7); //Nades X
-    WriteByte($49, dwHLBase + $705AF); //Satchel X
-    WriteByte($49, dwHLBase + $86371); //Mines X
-    WriteByte($49, dwHLBase + $7BFF2); //Snarks X
+    WriteByte($49, dwHLBase + $705DF); //Satchel X
+    WriteByte($49, dwHLBase + $863A1); //Mines X
+    WriteByte($49, dwHLBase + $7C022); //Snarks X
     WriteByte($4F, dwHLBase + $4BBE2); //SMG Launcher X
     WriteByte($83, dwHLBase + $2FFE1); //Gauss X
     WriteByte($C1, dwHLBase + $2FFE2); //Gauss X
     WriteByte($FE, dwHLBase + $2FFE3); //Gauss X
     WriteByte($49, dwHLBase + $30115); //Gauss X
+    WriteByte($49, dwHLBase + $30264); //Gauss Right click
     //WriteByte($49, dwHLBase + $301B4); //Gauss
   end;
 
@@ -378,8 +390,8 @@ begin
   if (CheckBoxProperRapidfire.Checked) then
   begin
     //Rapid fire all guns  X
-    WriteByte($90, dwHLBase + $632E8);
-    WriteByte($90, dwHLBase + $632E9);
+    WriteByte($90, dwHLBase + $63318);
+    WriteByte($90, dwHLBase + $63319);
     //rapid smg nades  X
 
     for i:= 0 to 5 do
@@ -406,8 +418,8 @@ begin
   begin
     //hl.dll+4BB43 - D8 05 A035A20A        - fadd dword ptr [hl.dll+A35A0]//smgnade
     //client.dll+1BF66 - 89 97 90000000        - mov [edi+00000090],edx//smgnade
-    WriteByte($74, dwHLBase + $632E8);
-    WriteByte($08, dwHLBase + $632E9);
+    WriteByte($74, dwHLBase + $63318);
+    WriteByte($08, dwHLBase + $63319);
 
     {
     WriteByte($D8, dwHLBase + $4BCE3);
@@ -447,10 +459,10 @@ end;
 
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin
-  ShowMessage(  'Half-Life Trainer v1.1' + sLineBreak +
+  ShowMessage(  'Half-Life Trainer v1.2' + sLineBreak +
                 'by pombenenge (on YouTube)' + sLineBreak +
-                'Last Updated: 2020-02-27' + sLineBreak +
-                'hl.exe version: 1.1.1.1' + sLineBreak + sLineBreak +
+                'Last Updated: 2021-05-02' + sLineBreak +
+                'hl.exe version: 1.1.1.1 (Doesn''t mean much in terms of compatibility)' + sLineBreak + sLineBreak +
                 'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo' + sLineBreak + sLineBreak +
                 'WARNING: The Trainer may cause crashes. Save often.' + sLineBreak + sLineBreak +
                 '-- How to use --' + sLineBreak +
@@ -466,7 +478,14 @@ begin
                 '   2. Run the Trainer as administrator.' + sLineBreak +
                 '   3. Check the instructions above and make sure you are doing it right.' + sLineBreak +
                 '   4. The Trainer may be outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
-                '       contact me)' + sLineBreak + sLineBreak +
+                '       contact me on YouTube)' + sLineBreak + sLineBreak +
+                'Q: Why do I explode when I spam SMG grenades' + sLineBreak +
+                'A: When you are in the main menu type "fps_max 100". In-Game try walking backwards or' + sLineBreak +
+                '     moving your mouse left or right while shooting grenades.' + sLineBreak +
+                '     The grenades must not collide in mid air!' + sLineBreak + sLineBreak +
+                'Q: My pirated version of the game won''t work with this trainer!' + sLineBreak +
+                'A: Buy the damn game! It''s like 10 bucks jfc..' + sLineBreak +
+                '     If you''re too poor, here is your answer: Cracked versions are not supported.' + sLineBreak + sLineBreak +
                 'Click on the icons for GitHub and Youtube links' + sLineBreak + sLineBreak +
                 'Have fun!'
                 );

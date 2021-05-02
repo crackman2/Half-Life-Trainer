@@ -1854,18 +1854,18 @@ object Form1: TForm1
   end
   object Label1: TLabel
     Left = 11
-    Height = 20
+    Height = 17
     Top = 10
-    Width = 54
+    Width = 51
     Caption = 'Max HP:'
     ParentColor = False
     ParentFont = False
   end
   object Label2: TLabel
     Left = 11
-    Height = 20
+    Height = 17
     Top = 70
-    Width = 53
+    Width = 50
     Caption = 'Max AP:'
     ParentColor = False
     ParentFont = False
@@ -1884,8 +1884,8 @@ object Form1: TForm1
   end
   object LabelMaxHP: TLabel
     Left = 92
-    Height = 20
-    Top = 9
+    Height = 17
+    Top = 10
     Width = 8
     Caption = '0'
     ParentColor = False
@@ -1893,8 +1893,8 @@ object Form1: TForm1
   end
   object LabelMaxAP: TLabel
     Left = 92
-    Height = 20
-    Top = 72
+    Height = 17
+    Top = 70
     Width = 8
     Caption = '0'
     ParentColor = False
@@ -1902,9 +1902,9 @@ object Form1: TForm1
   end
   object Label5: TLabel
     Left = 11
-    Height = 20
+    Height = 17
     Top = 140
-    Width = 56
+    Width = 54
     Caption = 'HP Rate:'
     ParentColor = False
     ParentFont = False
@@ -1923,7 +1923,7 @@ object Form1: TForm1
   end
   object LabelHPRate: TLabel
     Left = 92
-    Height = 20
+    Height = 17
     Top = 140
     Width = 8
     Caption = '0'
@@ -1932,9 +1932,9 @@ object Form1: TForm1
   end
   object CheckBoxEnableHPRegen: TCheckBox
     Left = 11
-    Height = 24
+    Height = 21
     Top = 320
-    Width = 210
+    Width = 191
     Caption = 'Enable Health Regeneration'
     Checked = True
     ParentFont = False
@@ -1943,16 +1943,16 @@ object Form1: TForm1
   end
   object Label3: TLabel
     Left = 11
-    Height = 20
+    Height = 17
     Top = 210
-    Width = 55
+    Width = 53
     Caption = 'AP Rate:'
     ParentColor = False
     ParentFont = False
   end
   object LabelAPRate: TLabel
     Left = 92
-    Height = 20
+    Height = 17
     Top = 210
     Width = 8
     Caption = '0'
@@ -1973,9 +1973,9 @@ object Form1: TForm1
   end
   object CheckBoxEnableAPRegen: TCheckBox
     Left = 11
-    Height = 24
+    Height = 21
     Top = 344
-    Width = 208
+    Width = 191
     Caption = 'Enable Armor Regeneration'
     Checked = True
     ParentFont = False
@@ -1994,9 +1994,9 @@ object Form1: TForm1
   end
   object CheckBoxInfAmmo: TCheckBox
     Left = 11
-    Height = 24
+    Height = 21
     Top = 392
-    Width = 119
+    Width = 108
     Caption = 'Infinite Ammo'
     OnChange = CheckBoxInfAmmoChange
     ParentFont = False
@@ -2004,9 +2004,9 @@ object Form1: TForm1
   end
   object CheckBoxProperRapidfire: TCheckBox
     Left = 11
-    Height = 24
+    Height = 21
     Top = 368
-    Width = 133
+    Width = 121
     Caption = 'Proper Rapidfire'
     OnChange = CheckBoxProperRapidfireChange
     ParentFont = False
@@ -2023,9 +2023,9 @@ object Form1: TForm1
   end
   object LabelStatus: TLabel
     Left = 11
-    Height = 20
+    Height = 17
     Top = 288
-    Width = 108
+    Width = 110
     Caption = 'Status: *crickets*'
     ParentColor = False
   end
@@ -2188,7 +2188,7 @@ object Form1: TForm1
   end
   object TimerGameStatus: TTimer
     Enabled = False
-    Interval = 500
+    Interval = 5000
     OnTimer = TimerGameStatusTimer
     left = 144
     top = 200
