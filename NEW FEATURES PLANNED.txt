@@ -1,0 +1,5 @@
+- AutoBhop
+- Option to disable Rapidfire with weapons that won't work with it anyway
+- Support for Opposing Force and Blue Shift
+- Infinite flashlight
+- Gauss gun Rapidfire

@@ -36,7 +36,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, ExtCtrls, jwatlhelp32, Windows,LCLIntf;
+  StdCtrls, ExtCtrls, jwatlhelp32, Windows,LCLIntf, strutils;
 
 type
 
@@ -45,12 +45,14 @@ type
   TForm1 = class(TForm)
     ButtonHelp: TButton;
     ButtonReInit: TButton;
+    CheckBoxAutoBhop: TCheckBox;
     CheckBoxProperRapidfire: TCheckBox;
     CheckBoxInfAmmo: TCheckBox;
     CheckBoxEnableAPRegen: TCheckBox;
     CheckBoxEnableHPRegen: TCheckBox;
     Image1: TImage;
     Image2: TImage;
+    Image3: TImage;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -60,6 +62,7 @@ type
     LabelMaxAP: TLabel;
     Label5: TLabel;
     LabelHPRate: TLabel;
+    TimerBhop: TTimer;
     TimerGameStatus: TTimer;
     TimerGetRapidFireAddress: TTimer;
     TimerRegen: TTimer;
@@ -69,6 +72,9 @@ type
     TrackBarHPRate: TTrackBar;
     procedure ButtonHelpClick(Sender: TObject);
     procedure ButtonReInitClick(Sender: TObject);
+    procedure CheckBoxAutoBhopChange(Sender: TObject);
+    procedure CheckBoxEnableAPRegenChange(Sender: TObject);
+    procedure CheckBoxEnableHPRegenChange(Sender: TObject);
 
     procedure CheckBoxInfAmmoChange(Sender: TObject);
     procedure CheckBoxProperRapidfireChange(Sender: TObject);
@@ -76,6 +82,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Image1Click(Sender: TObject);
     procedure Image2Click(Sender: TObject);
+    procedure Image3Click(Sender: TObject);
+    procedure TimerBhopTimer(Sender: TObject);
     procedure TimerGameStatusTimer(Sender: TObject);
     procedure TimerRegenTimer(Sender: TObject);
     procedure TrackBarAPRateChange(Sender: TObject);
@@ -96,12 +104,16 @@ type
   TLocalPlayer = record
     dwAddHP: DWORD;
     dwAddAP: DWORD;
+    dwJValue:DWORD;
+    dwOnGround:DWORD;
     dwAddMidair: DWORD;
     dwAddRapidfire: DWORD;
+    bOnGround:BYTE;
     fHP: single;
     fAP: single;
     fMaxHP: single;
     fMaxAP: single;
+    fJValue:single;
     fHPRate: single;
     fAPRate: single;
     fMidair: single;
@@ -120,6 +132,8 @@ var
   dwCLIENTBase: DWORD;
   bSMGNadeOriginalCode:array[0..5] of Byte;
   i:integer; //for loop indexer
+  KeyWord:PWord;
+  KeyStr:AnsiString;
 
 
 
@@ -166,6 +180,16 @@ begin
 end;
 
 function ReadByte(Address: DWORD):Byte;
+begin
+  ReadProcessMemory(hProcess, Pointer(Address), @Result, sizeof(Result), nil);
+end;
+
+procedure WriteWord(Value: Word; Address: DWORD);
+begin
+  WriteProcessMemory(hProcess, Pointer(Address), @Value, sizeof(Value), nil);
+end;
+
+function ReadWord(Address: DWORD):Word;
 begin
   ReadProcessMemory(hProcess, Pointer(Address), @Result, sizeof(Result), nil);
 end;
@@ -223,8 +247,13 @@ begin
   ModBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hw.dll'));
   ReadProcessMemory(hProcess, Pointer(ModBase + $7F6304), @Brendan.dwAddHP,   // X
     sizeof(Brendan.dwAddHP), nil);
+  Brendan.dwJValue:= Brendan.dwAddHP + $A8;
   Brendan.dwAddHP := Brendan.dwAddHP + $1E0; //X
   Brendan.dwAddAP := Brendan.dwAddHP + $5C;  //X
+  Brendan.dwOnGround:=ModBase + $122E2D4;
+
+
+
 
   //unnötig aber gerade kb das besser zu machen
   dwHWBase := ModBase;
@@ -290,6 +319,32 @@ end;
 procedure TForm1.Image2Click(Sender: TObject);
 begin
   OpenURL('https://www.youtube.com/user/pombenenge');
+end;
+
+procedure TForm1.Image3Click(Sender: TObject);
+begin
+  OpenURL('https://www.paypal.com/donate?hosted_button_id=24RWVGKZGRVMW');
+end;
+
+procedure TForm1.TimerBhopTimer(Sender: TObject);
+var
+  OnGround:BYTE=0;
+begin
+  KeyStr:=ReverseString(IntToBin(ReadWord(dwHWBase+$9CF548),16));
+
+  Brendan.bOnGround:=ReadByte(Brendan.dwOnGround);
+  Brendan.fJValue:=ReadFloat(Brendan.dwJValue);
+
+
+  //JValue:=PSingle(hwBaseAndBaseOffset^ + $A8);
+
+
+  if (KeyStr[2] = '1') and (Brendan.fJValue <= 0) and (Brendan.bOnGround=1) then
+  begin
+    WriteFloat(237.0,Brendan.dwJValue);
+  end;
+
+
 end;
 
 procedure TForm1.TimerGameStatusTimer(Sender: TObject);
@@ -457,11 +512,29 @@ begin
   FormCreate(nil);
 end;
 
+procedure TForm1.CheckBoxAutoBhopChange(Sender: TObject);
+begin
+  if CheckBoxAutoBhop.Checked then
+     TimerBhop.Enabled:=True
+     else
+     TimerBhop.Enabled:=False;
+end;
+
+procedure TForm1.CheckBoxEnableAPRegenChange(Sender: TObject);
+begin
+
+end;
+
+procedure TForm1.CheckBoxEnableHPRegenChange(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin
-  ShowMessage(  'Half-Life Trainer v1.2' + sLineBreak +
+  ShowMessage(  'Half-Life Trainer v1.2.1' + sLineBreak +
                 'by pombenenge (on YouTube)' + sLineBreak +
-                'Last Updated: 2021-05-02' + sLineBreak +
+                'Last Updated: 2021-05-14' + sLineBreak +
                 'hl.exe version: 1.1.1.1 (Doesn''t mean much in terms of compatibility)' + sLineBreak + sLineBreak +
                 'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo' + sLineBreak + sLineBreak +
                 'WARNING: The Trainer may cause crashes. Save often.' + sLineBreak + sLineBreak +
