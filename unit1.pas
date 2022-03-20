@@ -7,6 +7,7 @@ interface
 
 {
 ///////////////////////NOTIZEN///////////////////////
+////////////////////HALF-LIFE////////////////////////
 -------
        hl.dll+6D5F3 - 4A                    - dec edx //DEC 357 AMMO X          BROKEN fixed
        hl.dll+3A616 - 48                    - dec eax //DEC Pistol AMMO
@@ -31,6 +32,81 @@ interface
        client.dll+1BF86 - 89 97 90000000        - mov [edi+00000090],edx//smgnade
 
 
+//////////////////OPPOSING FORCE/////////////////////
+------
+      opfor.dll+5A177 - 48                    - dec eax              Pistol 9mm
+      opfor.dll+B2234 - 48                    - dec eax              357 Magnum
+      opfor.dll+2D875 - 4F                    - dec edi              357 Eagle
+      opfor.dll+73548 - 4A                    - dec edx              SMG
+      opfor.dll+737D3 - 49                    - dec ecx              SMG Grenade
+      opfor.dll+C407B - 48                    - dec eax              Shotgun Primary
+      opfor.dll+C42FF - 83 C0 FE              - add eax,-02          Shotgun Secondary
+      opfor.dll+247A0 - 48                    - dec eax              Crossbow
+      opfor.dll+B9338 - 48                    - dec eax              RPG
+      opfor.dll+40E7A - 83 C1 FE              - add ecx,-02          Gauss Primary
+      opfor.dll+40FED - 49                    - dec ecx              Gauss Secondary A
+      opfor.dll+4117B - 49                    - dec ecx              Gauss Secondary B
+      opfor.dll+32CDA - 2B C2                 - sub eax,edx          Egon
+      opfor.dll+5B95F - 49                    - dec ecx              Hornet Primary
+      opfor.dll+5C2E8 - 49                    - dec ecx              Hornet Secondary
+      opfor.dll+4E185 - 4A                    - dec edx              Grenade
+      opfor.dll+BA2AA - 49                    - dec ecx              Satchel
+      opfor.dll+DB1FC - 49                    - dec ecx              Mine
+      opfor.dll+CD3A2 - 49                    - dec ecx              Snark
+      opfor.dll+65356 - 4A                    - dec edx              M249
+      opfor.dll+299C9 - 83 C1 EC              - add ecx,-14          Displacer
+      opfor.dll+C525C - 4B                    - dec ebx              Sniper
+      opfor.dll+C8F77 - 48                    - dec eax              Spore Launcher Primary
+      opfor.dll+C9208 - 48                    - dec eax              Spore Launcher Secondary
+      opfor.dll+C02E1 - 49                    - dec ecx              Shock Roach
+
+//////////////////BLUE SHIFT/////////////////////
+------
+      hl.dll+3A425 - 48                    - dec eax                 Pistol 9mm
+      hl.dll+6D6C3 - 4A                    - dec edx                 357 Magnum
+      hl.dll+4BB80 - 4A                    - dec edx                 SMG
+      hl.dll+4BDD2 - 4F                    - dec edi                 SMG Grenade
+      hl.dll+775A6 - 4A                    - dec edx                 Shotgun Primary
+      hl.dll+777E9 - 83 C2 FE              - add edx,-02             Shotgun Secondary
+      hl.dll+1DB8A - 48                    - dec eax                 Crossbow
+      hl.dll+70A8A - 48                    - dec eax                 RPG
+      hl.dll+2FB80 - 83 C1 FE              - add ecx,-02             Gauss Primary
+      hl.dll+2FCB4 - 49                    - dec ecx                 Gauss Secondary A
+      hl.dll+2FE03 - 49                    - dec ecx                 Gauss Secondary B
+      hl.dll+2597A - 2B C2                 - sub eax,edx             Egon
+      hl.dll+3BB43 - 4A                    - dec edx                 Hornet Primary
+      hl.dll+3C44C - 49                    - dec ecx                 Hornet Secodary
+      hl.dll+350D6 - 4F                    - dec edi                 Grenade
+      hl.dll+718E8 - FF 08                 - dec [eax]               Satchel
+      hl.dll+87871 - 49                    - dec ecx                 Mine
+      hl.dll+7D31E - 49                    - dec ecx                 Snark
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 
@@ -43,6 +119,7 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    ButtonEnableAll: TButton;
     ButtonHelp: TButton;
     ButtonReInit: TButton;
     CheckBoxAutoBhop: TCheckBox;
@@ -50,6 +127,10 @@ type
     CheckBoxInfAmmo: TCheckBox;
     CheckBoxEnableAPRegen: TCheckBox;
     CheckBoxEnableHPRegen: TCheckBox;
+    EditMaxHP: TEdit;
+    EditMaxAP: TEdit;
+    EditHPRate: TEdit;
+    EditAPRate: TEdit;
     Image1: TImage;
     Image2: TImage;
     Image3: TImage;
@@ -64,12 +145,13 @@ type
     LabelHPRate: TLabel;
     TimerBhop: TTimer;
     TimerGameStatus: TTimer;
-    TimerGetRapidFireAddress: TTimer;
+    TimerEditRegenCheck: TTimer;
     TimerRegen: TTimer;
     TrackBarAPRate: TTrackBar;
     TrackBarMaxHP: TTrackBar;
     TrackBarMaxAP: TTrackBar;
     TrackBarHPRate: TTrackBar;
+    procedure ButtonEnableAllClick(Sender: TObject);
     procedure ButtonHelpClick(Sender: TObject);
     procedure ButtonReInitClick(Sender: TObject);
     procedure CheckBoxAutoBhopChange(Sender: TObject);
@@ -78,13 +160,16 @@ type
 
     procedure CheckBoxInfAmmoChange(Sender: TObject);
     procedure CheckBoxProperRapidfireChange(Sender: TObject);
+    procedure EditMaxHPChange(Sender: TObject);
 
     procedure FormCreate(Sender: TObject);
     procedure Image1Click(Sender: TObject);
     procedure Image2Click(Sender: TObject);
     procedure Image3Click(Sender: TObject);
+    procedure LabelMaxHPClick(Sender: TObject);
     procedure TimerBhopTimer(Sender: TObject);
     procedure TimerGameStatusTimer(Sender: TObject);
+    procedure TimerEditRegenCheckTimer(Sender: TObject);
     procedure TimerRegenTimer(Sender: TObject);
     procedure TrackBarAPRateChange(Sender: TObject);
     procedure TrackBarHPRateChange(Sender: TObject);
@@ -129,11 +214,15 @@ var
   ReIniter: boolean = False;
   dwHWBase: DWORD;
   dwHLBase: DWORD;
+  dwOPFORBase: DWORD;
   dwCLIENTBase: DWORD;
+  dwSDLBase: DWORD;
   bSMGNadeOriginalCode:array[0..5] of Byte;
   i:integer; //for loop indexer
   KeyWord:PWord;
-  KeyStr:AnsiString;
+  KeyStr:PChar;
+  CurrentGame:AnsiString; //Identifies game, 'h' for Half-Life, 'o' for opposing force, 'b' for blueshift
+  IsInGame:Boolean=false;
 
 
 
@@ -240,26 +329,27 @@ end;
  end;
 
 procedure InitAddresses();
-var
-      ModBase: DWORD;
 begin
     /// PATCH: "hw.dll"+007F6304  {   1E0 }
-  ModBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hw.dll'));
-  ReadProcessMemory(hProcess, Pointer(ModBase + $7F6304), @Brendan.dwAddHP,   // X
-    sizeof(Brendan.dwAddHP), nil);
+  dwHWBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hw.dll'));
+  dwCLIENTBase := DWORD(GetModuleBaseAddress(dwProcessId, 'client.dll'));
+  dwSDLBase := DWORD(GetModuleBaseAddress(dwProcessId, 'SDL2.dll'));
+
+
+  if (CurrentGame = 'h') or (CurrentGame = 'b') then
+    begin
+      dwHLBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hl.dll'));
+    end
+  else if  CurrentGame = 'o' then
+    begin
+      dwOPFORBase := DWORD(GetModuleBaseAddress(dwProcessId, 'opfor.dll'));
+    end;
+
+  ReadProcessMemory(hProcess, Pointer(dwHWBase + $7F6304), @Brendan.dwAddHP, sizeof(Brendan.dwAddHP), nil);
   Brendan.dwJValue:= Brendan.dwAddHP + $A8;
   Brendan.dwAddHP := Brendan.dwAddHP + $1E0; //X
   Brendan.dwAddAP := Brendan.dwAddHP + $5C;  //X
-  Brendan.dwOnGround:=ModBase + $122E2D4;
-
-
-
-
-  //unnötig aber gerade kb das besser zu machen
-  dwHWBase := ModBase;
-  //Infammo in HL.dll
-  dwHLBase := DWORD(GetModuleBaseAddress(dwProcessId, 'hl.dll'));
-  dwCLIENTBase := DWORD(GetModuleBaseAddress(dwProcessId, 'client.dll'));
+  Brendan.dwOnGround:=dwHWBase + $122E2D4;
 end;
 
 { TForm1 }
@@ -267,39 +357,80 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);// ENTRYYYYYYYYY
 var
   GameFound: boolean = False;
+  GameList:array[0..2] of AnsiString = ('Half-Life', 'Opposing Force', 'Blue Shift');
+  GameListCount:Integer=2;
+  GameListLength:Integer=0;
   temp: DWORD;
 begin
   //Initialization
   LabelMaxHP.Caption := IntToStr(TrackBarMaxHP.Position - 1);
   LabelMaxAP.Caption := IntToStr(TrackBarMaxAP.Position - 1);
-  LabelHPRate.Caption := floatToStr(TrackBarHPRate.Position / 10);
-  LabelAPRate.Caption := floatToStr(TrackBarAPRate.Position / 10);
+  LabelHPRate.Caption := floatToStr(TrackBarHPRate.Position / 10) + '%';
+  LabelAPRate.Caption := floatToStr(TrackBarAPRate.Position / 10) + '%';
   Brendan.fHPRate := TrackBarHPRate.Position / 1000;
   Brendan.fAPRate := TrackBarAPRate.Position / 1000;
 
-
-
+  //ShowMessage('GameList Length: ' + IntToStr(Length(GameList)));
+  GameListLength:=Length(GameList)-1;
   //Fenster Handle , ProcessId, OpenProcess-Handle..
+  TimerGameStatus.Enabled:=false;
+  dwProcessId:=0;
   hProcess := 0;
   while hProcess = 0 do
   begin
-    //hFenster := FindWindow(nil, 'Half-Life');
-    //GetWindowThreadProcessId(hFenster, @dwProcessId);
-    dwProcessId:= GetProcId('hl.exe');
+    if GameListCount >= GameListLength then
+       GameListCount:=0
+    else
+       Inc(GameListCount);
+
+    hFenster := FindWindow(nil,PChar(GameList[GameListCount]));
+    GetWindowThreadProcessId(hFenster, @dwProcessId);
+    //dwProcessId:= GetProcId('hl.exe');    //unreliable
     hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, dwProcessId);
-    if (hProcess = $0000) and (GameFound = False) then
+    if (hProcess = $0000) and (GameFound = False) and (GameListCount >= GameListLength)then
     begin
-      Form1.LabelStatus.Caption:= 'Status: Game not found. Start Half-life!';
+
+      Form1.LabelStatus.Caption:= 'Status: Game not found. Start Half-life or Opposing Force!';
       Form1.LabelStatus.Font.Color:= $0000DD;
       ShowMessage('Waiting for game...');
+      //ShowMessage('GameList Length is: ' + IntToStr(GameListLength) + ' GameListCount was: ' + IntToStr(GameListCount));
       GameFound := True;
     end;
     Sleep(100);
   end;
-  Form1.LabelStatus.Caption:= 'Status: Game found!';
-  Form1.LabelStatus.Font.Color:= $00DD00;
+  //ShowMessage('ProcID: ' + IntToStr(dwProcessId) + LineEnding + 'Process Handle: ' + IntToHex(hProcess,8));
 
-  Form1.TimerGameStatus.Enabled:=true;
+  TimerGameStatus.Enabled:=true;
+
+
+  if GameListCount = 0 then
+  begin
+    //set current game to either hl or opfor
+     CurrentGame:='h';
+     ShowMessage('Half-Life found!');
+     Form1.LabelStatus.Caption:= 'Status: Game found! Half-Life';
+  end
+  else if GameListCount = 1 then
+  begin
+      CurrentGame:='o';
+      ShowMessage('Opposing Force found!');
+      Form1.LabelStatus.Caption:= 'Status: Game found! Opposing Force';
+  end
+  else if GameListCount = 2 then
+  begin
+      CurrentGame:='b';
+      ShowMessage('Blue Shift found!');
+      Form1.LabelStatus.Caption:= 'Status: Game found! Blue Shift';
+  end;
+
+  Form1.LabelStatus.Font.Color:= $00DD00;
+  //TimerGameStatus.Enabled:=true;
+
+  //ShowMessage('ProcessID: ' + IntToStr(dwProcessId) + LineEnding +
+  //             'CurrentGame: ' + CurrentGame);
+
+
+
 
   //===HP and AP Addresses===
   InitAddresses();
@@ -326,34 +457,46 @@ begin
   OpenURL('https://www.paypal.com/donate?hosted_button_id=24RWVGKZGRVMW');
 end;
 
+procedure TForm1.LabelMaxHPClick(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.TimerBhopTimer(Sender: TObject);
 var
   OnGround:BYTE=0;
 begin
-  KeyStr:=ReverseString(IntToBin(ReadWord(dwHWBase+$9CF548),16));
+  KeyStr:=PChar(IntToBin(ReadByte(dwHWBase+$9CF548),8));
+
 
   Brendan.bOnGround:=ReadByte(Brendan.dwOnGround);
   Brendan.fJValue:=ReadFloat(Brendan.dwJValue);
 
-
-  //JValue:=PSingle(hwBaseAndBaseOffset^ + $A8);
-
-
-  if (KeyStr[2] = '1') and (Brendan.fJValue <= 0) and (Brendan.bOnGround=1) then
+  if (KeyStr[6] = '1')  and (Brendan.fJValue <= 0) and (Brendan.bOnGround=1) then
   begin
     WriteFloat(237.0,Brendan.dwJValue);
   end;
-
-
 end;
 
 procedure TForm1.TimerGameStatusTimer(Sender: TObject);
+var WinTitle:PChar;
+    HWCheck:Pointer=nil;
 begin
-  dwProcessId:= GetProcId('hl.exe');
-  //Form1.LabelStatus.Caption:= 'ID: ' + IntToStr(dwProcessId);
-  if dwProcessId = 6619182 then
+  if CurrentGame = 'h' then
+     WinTitle:='Half-Life'
+  else if CurrentGame = 'o'then
+     WinTitle:='Opposing Force'
+  else if CurrentGame = 'b' then
+     WinTitle:='Blue Shift';
+
+
+  HWCheck:= GetModuleBaseAddress(dwProcessId,'hw.dll');
+
+  //ShowMessage('HWCheck: ' + IntToStr(Integer(HWCheck)));
+
+  if (FindWindow(nil,WinTitle) = 0) or (HWCheck = Pointer(1)) then
   begin
-     Form1.LabelStatus.Caption:='Status: Game not running anymore!';
+     Form1.LabelStatus.Caption:='Status: Game not running!' + LineEnding + 'Click ''Reinitilize''';
      Form1.LabelStatus.Font.Color := $0000DD;
   end
   else
@@ -363,11 +506,38 @@ begin
 end;
 
 
+function Clamp(Value:Integer; vMin:Integer; vMax:Integer):Integer;
+begin
+     if Value >= vMax then
+        Result:=vMax
+     else if Value <= vMin then
+        Result:=vMin
+     else
+        Result:=Value;
+end;
 
+procedure TForm1.TimerEditRegenCheckTimer(Sender: TObject);
+begin
+  if EditMaxHP.Text <> '' then
+     TrackBarMaxHP.Position:= Clamp(StrToInt(EditMaxHP.Text),0,1000)
+  else
+     TrackBarMaxHP.Position:=1;
 
+  if EditMaxAP.Text <> '' then
+     TrackBarMaxAP.Position:= Clamp(StrToInt(EditMaxAP.Text),0,1000)
+  else
+     TrackBarMaxAP.Position:=1;
 
+  if EditAPRate.Text <> '' then
+     TrackBarAPRate.Position:= Clamp(StrToInt(EditAPRate.Text),0,1000)
+  else
+     TrackBarAPRate.Position:=1;
 
-
+  if EditHPRate.Text <> '' then
+     TrackBarHPRate.Position:= Clamp(StrToInt(EditHPRate.Text),0,1000)
+  else
+     TrackBarHPRate.Position:=1;
+end;
 
 
 procedure TForm1.CheckBoxInfAmmoChange(Sender: TObject);
@@ -375,128 +545,341 @@ begin
   if CheckBoxInfAmmo.Checked then
   begin
     //NOPping dec opcode (or sub for the egon)
+    if CurrentGame = 'h' then
+    begin
+      WriteByte($90, dwHLBase + $6D5F3); //357 X  FIXED
+      WriteByte($90, dwHLBase + $3A616); //Pistol X
+      WriteByte($90, dwHLBase + $4B990); //SMG X
+      WriteByte($90, dwHLBase + $76297); //Shotgun X FIXED 764DA
+      WriteByte($90, dwHLBase + $764DA); //Shotgun Doppelschuss  FIXED
+      WriteByte($90, dwHLBase + $764DA+1); //Shotgun Doppelschuss
+      WriteByte($90, dwHLBase + $764DA+2); //Shotgun Doppelschuss
+      WriteByte($90, dwHLBase + $1DF4A); //Crossbow X
+      WriteByte($90, dwHLBase + $6F77A); //Rockets X
+      WriteByte($90, dwHLBase + $25DDA); //Egon 1 X
+      WriteByte($90, dwHLBase + $25DDB); //Egon 2 X
+      // hl.dll+3C59C - 49                    - dec ecx //Hornet gun rechtsklick
+      WriteByte($90, dwHLBase + $3BD33); //Hornet 2 X
+      WriteByte($90, dwHLBase + $3C63C); //Hornet rechtsklick
+      WriteByte($90, dwHLBase + $352C7); //Nades   X
+      WriteByte($90, dwHLBase + $705DF); //Satchel X
+      WriteByte($90, dwHLBase + $863A1); //Mines X
+      WriteByte($90, dwHLBase + $7C022); //Snarks X
+      WriteByte($90, dwHLBase + $4BBE2); //SMG Launcher
+      WriteByte($90, dwHLBase + $2FFE1); //Gauss
+      WriteByte($90, dwHLBase + $2FFE2); //Gauss
+      WriteByte($90, dwHLBase + $2FFE3); //Gauss
+      WriteByte($90, dwHLBase + $30115); //Gauss
+      WriteByte($90, dwHLBase + $30264); //Gauss Right Click
+      //WriteByte($90, dwHLBase + $301B4); //Gauss
+    end
+    else if CurrentGame = 'o' then
+    begin
+         //Opfor code goes here (ACTIVATE)
+      WriteByte($90, dwOPFORBase + $5A177); //Pistol 9mm
+      WriteByte($90, dwOPFORBase + $B2234); //357 Magnum
+      WriteByte($90, dwOPFORBase + $2D875); //Eagle
+      WriteByte($90, dwOPFORBase + $73548); //SMG
+      WriteByte($90, dwOPFORBase + $737D3); //SMG Grenade
+      WriteByte($90, dwOPFORBase + $C407B); //Shotgun Primary
+      WriteByte($90, dwOPFORBase + $C42FF); //Shotgun Secondary
+         WriteByte($90, dwOPFORBase + $C42FF + 1);
+         WriteByte($90, dwOPFORBase + $C42FF + 2);
+      WriteByte($90, dwOPFORBase + $247A0); //Crossbow
+      WriteByte($90, dwOPFORBase + $B9338); //RPG
+      WriteByte($90, dwOPFORBase + $40E7A); //Gauss Primary
+         WriteByte($90, dwOPFORBase + $40E7A + 1);
+         WriteByte($90, dwOPFORBase + $40E7A + 2);
+      WriteByte($90, dwOPFORBase + $40FED); //Gauss Secondary A
+      WriteByte($90, dwOPFORBase + $4117B); //Gauss Secondary B
+      WriteByte($90, dwOPFORBase + $32CDA); //Egon
+         WriteByte($90, dwOPFORBase + $32CDA + 1);
+      WriteByte($90, dwOPFORBase + $5B95F); //Hornet Primary
+      WriteByte($90, dwOPFORBase + $5C2E8); //Hornet Secondary
+      WriteByte($90, dwOPFORBase + $4E185); //Grenade
+      WriteByte($90, dwOPFORBase + $BA2AA); //Satchel
+      WriteByte($90, dwOPFORBase + $DB1FC); //Mine
+      WriteByte($90, dwOPFORBase + $CD3A2); //Snark
+      WriteByte($90, dwOPFORBase + $65356); //M249
+      WriteByte($90, dwOPFORBase + $299C9); //Displacer
+         WriteByte($90, dwOPFORBase + $299C9 + 1);
+         WriteByte($90, dwOPFORBase + $299C9 + 2);
+      WriteByte($90, dwOPFORBase + $C525C); //Sniper
+      WriteByte($90, dwOPFORBase + $C8F77); //Spore Launcher Primary
+      WriteByte($90, dwOPFORBase + $C9208); //Spore Launcher Secondary
+      WriteByte($90, dwOPFORBase + $C02E1); //Shock Roach
+    end
+    else if CurrentGame = 'b' then
+    begin
+       //Blue Shit code goes here (ACTIVATE)
+      WriteByte($90, dwHLBase+$3A425);//Pistol 9mm
+      WriteByte($90, dwHLBase+$6D6C3);//357 Magnum
+      WriteByte($90, dwHLBase+$4BB80);//SMG
+      WriteByte($90, dwHLBase+$4BDD2);//SMG Grenade
+      WriteByte($90, dwHLBase+$775A6);//Shotgun Primary
+      WriteByte($90, dwHLBase+$777E9);//Shotgun Secondary
+         WriteByte($90, dwHLBase+$777E9 + 1);
+         WriteByte($90, dwHLBase+$777E9 + 2);
+      WriteByte($90, dwHLBase+$1DB8A);//Crossbow
+      WriteByte($90, dwHLBase+$70A8A);//RPG
+      WriteByte($90, dwHLBase+$2FB80);//Gauss Primary
+         WriteByte($90, dwHLBase+$2FB80 + 1);
+         WriteByte($90, dwHLBase+$2FB80 + 2);
+      WriteByte($90, dwHLBase+$2FCB4);//Gauss Secondary A
+      WriteByte($90, dwHLBase+$2FE03);//Gauss Secondary B
+      WriteByte($90, dwHLBase+$2597A);//Egon
+         WriteByte($90, dwHLBase+$2597A+1);
+      WriteByte($90, dwHLBase+$3BB43);//Hornet Primary
+      WriteByte($90, dwHLBase+$3C44C);//Hornet Secondary
+      WriteByte($90, dwHLBase+$350D6);//Grenade
+      WriteByte($90, dwHLBase+$718E8);//Satchel
+         WriteByte($90, dwHLBase+$718E8+1);
+      WriteByte($90, dwHLBase+$87871);//Mine
+      WriteByte($90, dwHLBase+$7D31E);//Snark
+    end;
 
-    WriteByte($90, dwHLBase + $6D5F3); //357 X  FIXED
-    WriteByte($90, dwHLBase + $3A616); //Pistol X
-    WriteByte($90, dwHLBase + $4B990); //SMG X
-    WriteByte($90, dwHLBase + $76297); //Shotgun X FIXED 764DA
-    WriteByte($90, dwHLBase + $764DA); //Shotgun Doppelschuss  FIXED
-    WriteByte($90, dwHLBase + $764DA+1); //Shotgun Doppelschuss
-    WriteByte($90, dwHLBase + $764DA+2); //Shotgun Doppelschuss
-    WriteByte($90, dwHLBase + $1DF4A); //Crossbow X
-    WriteByte($90, dwHLBase + $6F77A); //Rockets X
-    WriteByte($90, dwHLBase + $25DDA); //Egon 1 X
-    WriteByte($90, dwHLBase + $25DDB); //Egon 2 X
-    // hl.dll+3C59C - 49                    - dec ecx //Hornet gun rechtsklick
-    WriteByte($90, dwHLBase + $3BD33); //Hornet 2 X
-    WriteByte($90, dwHLBase + $3C63C); //Hornet rechtsklick
-    WriteByte($90, dwHLBase + $352C7); //Nades   X
-    WriteByte($90, dwHLBase + $705DF); //Satchel X
-    WriteByte($90, dwHLBase + $863A1); //Mines X
-    WriteByte($90, dwHLBase + $7C022); //Snarks X
-    WriteByte($90, dwHLBase + $4BBE2); //SMG Launcher
-    WriteByte($90, dwHLBase + $2FFE1); //Gauss
-    WriteByte($90, dwHLBase + $2FFE2); //Gauss
-    WriteByte($90, dwHLBase + $2FFE3); //Gauss
-    WriteByte($90, dwHLBase + $30115); //Gauss
-    WriteByte($90, dwHLBase + $30264); //Gauss Right Click
-    //WriteByte($90, dwHLBase + $301B4); //Gauss
+
+
+
+
   end
   else
   begin
-    WriteByte($4A, dwHLBase + $6D5F3); //357 X
-    WriteByte($48, dwHLBase + $3A616); //Pistol X
-    WriteByte($4A, dwHLBase + $4B990); //SMG  X
-    WriteByte($4A, dwHLBase + $76297); //Shotgun X
-    WriteByte($83, dwHLBase + $764DA); //Shotgun Doppelschuss  83 C2 FE
-    WriteByte($C2, dwHLBase + $764DA+1); //Shotgun Doppelschuss
-    WriteByte($FE, dwHLBase + $764DA+2); //Shotgun Doppelschuss
-    WriteByte($48, dwHLBase + $1DF4A); //Crossbow X
-    WriteByte($49, dwHLBase + $6F77A ); //Rockets X
-    WriteByte($2B, dwHLBase + $25DDA); //Egon 1 X
-    WriteByte($C2, dwHLBase + $25DDB); //Egon 2 X
-    WriteByte($4F, dwHLBase + $3BD33); //Hornet 2 X
-    WriteByte($49, dwHLBase + $3C63C);  //Hornet Rightclick
-    WriteByte($4F, dwHLBase + $352C7); //Nades X
-    WriteByte($49, dwHLBase + $705DF); //Satchel X
-    WriteByte($49, dwHLBase + $863A1); //Mines X
-    WriteByte($49, dwHLBase + $7C022); //Snarks X
-    WriteByte($4F, dwHLBase + $4BBE2); //SMG Launcher X
-    WriteByte($83, dwHLBase + $2FFE1); //Gauss X
-    WriteByte($C1, dwHLBase + $2FFE2); //Gauss X
-    WriteByte($FE, dwHLBase + $2FFE3); //Gauss X
-    WriteByte($49, dwHLBase + $30115); //Gauss X
-    WriteByte($49, dwHLBase + $30264); //Gauss Right click
-    //WriteByte($49, dwHLBase + $301B4); //Gauss
+    if CurrentGame = 'h' then
+    begin
+      WriteByte($4A, dwHLBase + $6D5F3); //357 X
+      WriteByte($48, dwHLBase + $3A616); //Pistol X
+      WriteByte($4A, dwHLBase + $4B990); //SMG  X
+      WriteByte($4A, dwHLBase + $76297); //Shotgun X
+      WriteByte($83, dwHLBase + $764DA); //Shotgun Doppelschuss  83 C2 FE
+      WriteByte($C2, dwHLBase + $764DA+1); //Shotgun Doppelschuss
+      WriteByte($FE, dwHLBase + $764DA+2); //Shotgun Doppelschuss
+      WriteByte($48, dwHLBase + $1DF4A); //Crossbow X
+      WriteByte($49, dwHLBase + $6F77A ); //Rockets X
+      WriteByte($2B, dwHLBase + $25DDA); //Egon 1 X
+      WriteByte($C2, dwHLBase + $25DDB); //Egon 2 X
+      WriteByte($4F, dwHLBase + $3BD33); //Hornet 2 X
+      WriteByte($49, dwHLBase + $3C63C);  //Hornet Rightclick
+      WriteByte($4F, dwHLBase + $352C7); //Nades X
+      WriteByte($49, dwHLBase + $705DF); //Satchel X
+      WriteByte($49, dwHLBase + $863A1); //Mines X
+      WriteByte($49, dwHLBase + $7C022); //Snarks X
+      WriteByte($4F, dwHLBase + $4BBE2); //SMG Launcher X
+      WriteByte($83, dwHLBase + $2FFE1); //Gauss X
+      WriteByte($C1, dwHLBase + $2FFE2); //Gauss X
+      WriteByte($FE, dwHLBase + $2FFE3); //Gauss X
+      WriteByte($49, dwHLBase + $30115); //Gauss X
+      WriteByte($49, dwHLBase + $30264); //Gauss Right click
+      //WriteByte($49, dwHLBase + $301B4); //Gauss
+    end
+    else if CurrentGame = 'o' then
+    begin
+         //Opfor code goes here (DEACTIVATE)
+         WriteByte($48, dwOPFORBase + $5A177); //Pistol 9mm
+      WriteByte($48, dwOPFORBase + $B2234); //357 Magnum
+      WriteByte($4F, dwOPFORBase + $2D875); //Eagle
+      WriteByte($4A, dwOPFORBase + $73548); //SMG
+      WriteByte($49, dwOPFORBase + $737D3); //SMG Grenade
+      WriteByte($48, dwOPFORBase + $C407B); //Shotgun Primary
+      WriteByte($83, dwOPFORBase + $C42FF); //Shotgun Secondary
+         WriteByte($C0, dwOPFORBase + $C42FF + 1);
+         WriteByte($FE, dwOPFORBase + $C42FF + 2);
+      WriteByte($48, dwOPFORBase + $247A0); //Crossbow
+      WriteByte($48, dwOPFORBase + $B9338); //RPG
+      WriteByte($83, dwOPFORBase + $40E7A); //Gauss Primary
+         WriteByte($C1, dwOPFORBase + $40E7A + 1);
+         WriteByte($FE, dwOPFORBase + $40E7A + 2);
+      WriteByte($49, dwOPFORBase + $40FED); //Gauss Secondary A
+      WriteByte($49, dwOPFORBase + $4117B); //Gauss Secondary B
+      WriteByte($2B, dwOPFORBase + $32CDA); //Egon
+         WriteByte($C2, dwOPFORBase + $32CDA + 1);
+      WriteByte($49, dwOPFORBase + $5B95F); //Hornet Primary
+      WriteByte($49, dwOPFORBase + $5C2E8); //Hornet Secondary
+      WriteByte($4A, dwOPFORBase + $4E185); //Grenade
+      WriteByte($49, dwOPFORBase + $BA2AA); //Satchel
+      WriteByte($49, dwOPFORBase + $DB1FC); //Mine
+      WriteByte($49, dwOPFORBase + $CD3A2); //Snark
+      WriteByte($4A, dwOPFORBase + $65356); //M249
+      WriteByte($83, dwOPFORBase + $299C9); //Displacer
+         WriteByte($C1, dwOPFORBase + $299C9 + 1);
+         WriteByte($EC, dwOPFORBase + $299C9 + 2);
+      WriteByte($4B, dwOPFORBase + $C525C); //Sniper
+      WriteByte($48, dwOPFORBase + $C8F77); //Spore Launcher Primary
+      WriteByte($48, dwOPFORBase + $C9208); //Spore Launcher Secondary
+      WriteByte($49, dwOPFORBase + $C02E1); //Shock Roach
+
+    end
+    else if CurrentGame = 'b' then
+    begin
+      //to do (deactivate)
+      WriteByte($48, dwHLBase+$3A425);//Pistol 9mm
+      WriteByte($4A, dwHLBase+$6D6C3);//357 Magnum
+      WriteByte($4A, dwHLBase+$4BB80);//SMG
+      WriteByte($4F, dwHLBase+$4BDD2);//SMG Grenade
+      WriteByte($4A, dwHLBase+$775A6);//Shotgun Primary
+      WriteByte($83, dwHLBase+$777E9);//Shotgun Secondary
+         WriteByte($C2, dwHLBase+$777E9 + 1);
+         WriteByte($FE, dwHLBase+$777E9 + 2);
+      WriteByte($48, dwHLBase+$1DB8A);//Crossbow
+      WriteByte($48, dwHLBase+$70A8A);//RPG
+      WriteByte($83, dwHLBase+$2FB80);//Gauss Primary
+         WriteByte($C1, dwHLBase+$2FB80 + 1);
+         WriteByte($FE, dwHLBase+$2FB80 + 2);
+      WriteByte($49, dwHLBase+$2FCB4);//Gauss Secondary A
+      WriteByte($49, dwHLBase+$2FE03);//Gauss Secondary B
+      WriteByte($2B, dwHLBase+$2597A);//Egon
+         WriteByte($C2, dwHLBase+$2597A+1);
+      WriteByte($4A, dwHLBase+$3BB43);//Hornet Primary
+      WriteByte($49, dwHLBase+$3C44C);//Hornet Secondary
+      WriteByte($4F, dwHLBase+$350D6);//Grenade
+      WriteByte($FF, dwHLBase+$718E8);//Satchel
+         WriteByte($08, dwHLBase+$718E8+1);
+      WriteByte($49, dwHLBase+$87871);//Mine
+      WriteByte($49, dwHLBase+$7D31E);//Snark
+    end;
+  end;
+end;
+
+
+{      ///////// Notes for Half-Life //////////
+       hl.dll+632E8 - 74 08                 - je hl.dll+632F2 //rapid fire Primary
+       hl.dll+63344 - 74 08                 - je hl.dll+6334E //rapid fire Secondary
+
+       hl.dll+3C59C - 49                    - dec ecx //Hornet gun rechtsklick (AMMO ONLY)
+       hl.dll+4BCE3 - D8 05 A035A20A        - fadd dword ptr [hl.dll+A35A0]//smgnade X
+       client.dll+1BF66 - 89 97 90000000        - mov [edi+00000090],edx//smgnade (probably wrong, unused)
+
+
+}
+
+
+
+{
+       //////// Notes for OpFor ///////////
+
+       Copied from HL (to find the ones in OpFor)
+               ------- infinite firerate ------
+               hl.dll+632F4 - 85 C0                 - test eax,eax
+               hl.dll+632F6 - 0F84 C9000000         - je hl.dll+633C5
+               hl.dll+632FC - 8B 0D 8CE04C27        - mov ecx,[hl.dll+DE08C] { (043B7620) }
+               hl.dll+63302 - D9 86 8C000000        - fld dword ptr [esi+0000008C]
+               hl.dll+63308 - D8 61 04              - fsub dword ptr [ecx+04]
+               hl.dll+6330B - DC 15 B8034A27        - fcom qword ptr [hl.dll+B03B8] { (-1.00) }
+               hl.dll+63311 - DFE0                  - fnstsw ax
+               hl.dll+63313 - 25 00410000           - and eax,00004100 { 16640 }
+               hl.dll+63318 - 74 08                 - je hl.dll+63322 { RAPIDFIRE NOP THIS ONE} <----------------------
+               hl.dll+6331A - DDD8                  - fstp st(0)
+               hl.dll+6331C - DD 05 B8034A27        - fld qword ptr [hl.dll+B03B8] { (-1.00) }
+               hl.dll+63322 - D9 9E 8C000000        - fstp dword ptr [esi+0000008C]
+               hl.dll+63328 - 8B 15 8CE04C27        - mov edx,[hl.dll+DE08C] { (043B7620) }
+               hl.dll+6332E - D9 86 90000000        - fld dword ptr [esi+00000090]
+               hl.dll+63334 - D8 62 04              - fsub dword ptr [edx+04]
+               hl.dll+63337 - DC 15 885E4927        - fcom qword ptr [hl.dll+A5E88] { (0.00) }
+               hl.dll+6333D - DFE0                  - fnstsw ax
+               hl.dll+6333F - 25 00410000           - and eax,00004100 { 16640 }
+
+               ------- infinite smg nade firerate -------
+               hl.dll+4BCC1 - 6A 01                 - push 01 { 1 }
+               hl.dll+4BCC3 - FF 15 FCDF4C27        - call dword ptr [hl.dll+DDFFC] { ->hw.dll+6EB50 }
+               hl.dll+4BCC9 - 83 C4 4C              - add esp,4C { 76 }
+               hl.dll+4BCCC - 8B CE                 - mov ecx,esi
+               hl.dll+4BCCE - 68 0000803F           - push 3F800000 { 1.00 }
+               hl.dll+4BCD3 - E8 A8250400           - call hl.dll+8E280
+               hl.dll+4BCD8 - D9 9E 8C000000        - fstp dword ptr [esi+0000008C]
+               hl.dll+4BCDE - E8 5DCF0300           - call hl.dll+88C40
+               hl.dll+4BCE3 - D8 05 A0354927        - fadd dword ptr [hl.dll+A35A0] { RAPID SMG NADES - COPY CODE TO RESTORE LATER, NOP ALL}
+               hl.dll+4BCE9 - D9 9E 90000000        - fstp dword ptr [esi+00000090]
+               hl.dll+4BCEF - E8 4CCF0300           - call hl.dll+88C40
+               hl.dll+4BCF4 - D8 05 64354927        - fadd dword ptr [hl.dll+A3564] { (5.00) }
+               hl.dll+4BCFA - 8B 4E 70              - mov ecx,[esi+70]
+               hl.dll+4BCFD - 8B 96 9C000000        - mov edx,[esi+0000009C]
+               hl.dll+4BD03 - D9 9E 94000000        - fstp dword ptr [esi+00000094]
+               hl.dll+4BD09 - 8B 84 91 D8040000     - mov eax,[ecx+edx*4+000004D8]
+               hl.dll+4BD10 - 85 C0                 - test eax,eax
+
+
+       Actual Opcodes from Opposing Force
+               ------- infinite firerate -------
+               opfor.dll+A67F6 - 74 08                 - je opfor.dll+A6800
+
+               ------- infinite secondary firerate ------
+               opfor.dll+A6822 - 74 08                 - je opfor.dll+A682C
+       Blue Shift Firerate
+               hl.dll+63488 - 74 08                 - je hl.dll+63492 //Primary
+               hl.dll+634B4 - 74 08                 - je hl.dll+634BE //Secondary
+
+
+
+
+
+}
+procedure TForm1.CheckBoxProperRapidfireChange(Sender: TObject);
+begin
+  if (CheckBoxProperRapidfire.Checked) then
+  begin
+    if CurrentGame = 'h' then
+    begin
+      //Rapid fire all guns
+      WriteByte($90, dwHLBase + $63318);   //Primary Fire
+      WriteByte($90, dwHLBase + $63319);
+
+      WriteByte($90, dwHLBase + $63344);   //Secondary Fire
+      WriteByte($90, dwHLBase + $63345);
+    end
+    else if CurrentGame = 'o' then
+    begin
+      //Opfor code goes here
+      WriteByte($90, dwOPFORBase + $A67F6);//Primary Fire
+      WriteByte($90, dwOPFORBase + $A67F6 + 1);
+
+      WriteByte($90, dwOPFORBase + $A6822);//Secondary Fire
+      WriteByte($90, dwOPFORBase + $A6822 + 1);
+    end
+    else if CurrentGame = 'b' then
+    begin
+      //Blue Shift
+      WriteByte($90, dwHLBase + $63488);   //Primary Fire
+      WriteByte($90, dwHLBase + $63489);
+
+      WriteByte($90, dwHLBase + $634B4);   //Secondary Fire
+      WriteByte($90, dwHLBase + $634B5);
+    end;
+  end
+  else
+  begin
+    if CurrentGame = 'h' then
+    begin
+      WriteByte($74, dwHLBase + $63318);   //Primary Fire
+      WriteByte($08, dwHLBase + $63319);
+
+      WriteByte($74, dwHLBase + $63344);   //Secondary Fire
+      WriteByte($08, dwHLBase + $63345);
+
+    end
+    else if CurrentGame = 'o' then
+    begin
+        //Opfor code goes here
+        WriteByte($74, dwOPFORBase + $A67F6);//Primary Fire
+        WriteByte($08, dwOPFORBase + $A67F6 + 1);
+
+        WriteByte($74, dwOPFORBase + $A6822);//Secondary Fire
+        WriteByte($08, dwOPFORBase + $A6822 + 1);
+    end
+    else if CurrentGame = 'b' then
+    begin
+        //Blue Shift
+        WriteByte($74, dwHLBase + $63488);   //Primary Fire
+        WriteByte($08, dwHLBase + $63489);
+
+        WriteByte($74, dwHLBase + $634B4);   //Secondary Fire
+        WriteByte($08, dwHLBase + $634B5);
+    end;
   end;
 
 end;
 
-
-{
-       hl.dll+632E8 - 74 08                 - je hl.dll+632F2 //inf firerate  X
-       hl.dll+3C59C - 49                    - dec ecx //Hornet gun rechtsklick
-       hl.dll+4BCE3 - D8 05 A035A20A        - fadd dword ptr [hl.dll+A35A0]//smgnade X
-       client.dll+1BF66 - 89 97 90000000        - mov [edi+00000090],edx//smgnade
-}
-procedure TForm1.CheckBoxProperRapidfireChange(Sender: TObject);
+procedure TForm1.EditMaxHPChange(Sender: TObject);
 begin
-
-  if (CheckBoxProperRapidfire.Checked) then
-  begin
-    //Rapid fire all guns  X
-    WriteByte($90, dwHLBase + $63318);
-    WriteByte($90, dwHLBase + $63319);
-    //rapid smg nades  X
-
-    for i:= 0 to 5 do
-    begin
-      bSMGNadeOriginalCode[i] := ReadByte(dwHLBase + $4BCE3 + i);
-    end;
-
-    WriteByte($90, dwHLBase + $4BCE3);
-    WriteByte($90, dwHLBase + $4BCE4);
-    WriteByte($90, dwHLBase + $4BCE5);
-    WriteByte($90, dwHLBase + $4BCE6);
-    WriteByte($90, dwHLBase + $4BCE7);
-    WriteByte($90, dwHLBase + $4BCE8);
-    //rapid smg nades
-    //WriteByte($90, dwCLIENTBase + $1BF66);
-    //WriteByte($90, dwCLIENTBase + $1BF67);
-    //WriteByte($90, dwCLIENTBase + $1BF68);
-    //WriteByte($90, dwCLIENTBase + $1BF69);
-   // WriteByte($90, dwCLIENTBase + $1BF6A);
-   // WriteByte($90, dwCLIENTBase + $1BF6B);
-
-  end
-  else
-  begin
-    //hl.dll+4BB43 - D8 05 A035A20A        - fadd dword ptr [hl.dll+A35A0]//smgnade
-    //client.dll+1BF66 - 89 97 90000000        - mov [edi+00000090],edx//smgnade
-    WriteByte($74, dwHLBase + $63318);
-    WriteByte($08, dwHLBase + $63319);
-
-    {
-    WriteByte($D8, dwHLBase + $4BCE3);
-    WriteByte($05, dwHLBase + $4BCE4);
-    WriteByte($A0, dwHLBase + $4BCE5);
-    WriteByte($35, dwHLBase + $4BCE6);
-    WriteByte($F1, dwHLBase + $4BCE7);
-    WriteByte($07, dwHLBase + $4BCE9);
-    }
-
-    for i:= 0 to 5 do
-    begin
-      WriteByte(bSMGNadeOriginalCode[i], dwHLBase + $4BCE3 + i)
-    end;
-
-    //WriteByte($89, dwCLIENTBase + $1BF66);
-    //WriteByte($97, dwCLIENTBase + $1BF67);
-    //WriteByte($90, dwCLIENTBase + $1BF68);
-    //WriteByte($00, dwCLIENTBase + $1BF69);
-    //WriteByte($00, dwCLIENTBase + $1BF6A);
-    //WriteByte($00, dwCLIENTBase + $1BF6B);
-  end;
 
 end;
 
@@ -532,25 +915,24 @@ end;
 
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin
-  ShowMessage(  'Half-Life Trainer v1.2.1' + sLineBreak +
+  ShowMessage(  'Half-Life Trainer v1.3' + sLineBreak +
                 'by pombenenge (on YouTube)' + sLineBreak +
-                'Last Updated: 2021-05-14' + sLineBreak +
-                'hl.exe version: 1.1.1.1 (Doesn''t mean much in terms of compatibility)' + sLineBreak + sLineBreak +
+                'Last Updated: 2022-03-19' + sLineBreak + sLineBreak +
                 'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo' + sLineBreak + sLineBreak +
-                'WARNING: The Trainer may cause crashes. Save often.' + sLineBreak + sLineBreak +
+                'WARNING: The trainer may cause crashes. Save often.' + sLineBreak + sLineBreak +
                 '-- How to use --' + sLineBreak +
-                '1. Start Half-life (Tested on Steam version, other versions may or may not work)' + sLineBreak +
-                '2. Start the Trainer (If the trainer is already running, click on "Reinitialize")' + sLineBreak +
-                '3. Adjust Trainer settings to your liking.' + sLineBreak + sLineBreak +
+                '1. Start Half-life, Opposing Force or Blue Shift (Tested on Steam version, other versions probably don''t work)' + sLineBreak +
+                '2. Start the trainer (If the trainer is already running, click on "Reinitialize")' + sLineBreak +
+                '3. Adjust trainer settings to your liking.' + sLineBreak + sLineBreak +
                 '-- FAQ --' + sLineBreak +
                 'Q: Does it work in multiplayer?' + sLineBreak +
                 'A: No. If you try you will get VAC banned. Seriously, do NOT do it.' + sLineBreak + sLineBreak +
                 'Q: Nothing happens? Why?' + sLineBreak +
                 'A: There can be multiple reasons why it does not work.' + sLineBreak +
-                '   1. You probably need the Steam version of Half-Life.' + sLineBreak +
-                '   2. Run the Trainer as administrator.' + sLineBreak +
+                '   1. You probably need the Steam version of Half-Life. (Cracked or WON version do not work)' + sLineBreak +
+                '   2. Run the trainer as administrator.' + sLineBreak +
                 '   3. Check the instructions above and make sure you are doing it right.' + sLineBreak +
-                '   4. The Trainer may be outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
+                '   4. The trainer may be outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
                 '       contact me on YouTube)' + sLineBreak + sLineBreak +
                 'Q: Why do I explode when I spam SMG grenades' + sLineBreak +
                 'A: When you are in the main menu type "fps_max 100". In-Game try walking backwards or' + sLineBreak +
@@ -559,9 +941,28 @@ begin
                 'Q: My pirated version of the game won''t work with this trainer!' + sLineBreak +
                 'A: Buy the damn game! It''s like 10 bucks jfc..' + sLineBreak +
                 '     If you''re too poor, here is your answer: Cracked versions are not supported.' + sLineBreak + sLineBreak +
-                'Click on the icons for GitHub and Youtube links' + sLineBreak + sLineBreak +
+                'Click on the icons for GitHub and YouTube links' + sLineBreak + sLineBreak +
                 'Have fun!'
                 );
+end;
+
+procedure TForm1.ButtonEnableAllClick(Sender: TObject);
+begin
+
+  TrackBarMaxHP.Position:=1000;
+  TrackBarMaxAP.Position:=1000;
+  TrackBarHPRate.Position:=1000;
+  TrackBarAPRate.Position:=1000;
+  CheckBoxEnableHPRegen.Checked:=True;
+  CheckBoxEnableAPRegen.Checked:=True;
+  CheckBoxProperRapidfire.Checked:=True;
+  CheckBoxAutoBhop.Checked:=True;
+  CheckBoxInfAmmo.Checked:=True;
+
+  //CheckBoxInfAmmoChange(nil);
+  //CheckBoxAutoBhopChange(nil);
+  //CheckBoxProperRapidfireChange(nil);
+
 end;
 
 
@@ -572,13 +973,18 @@ begin
   Brendan.fAP := ReadFloat(Brendan.dwAddAP);
 
   // Regenerate HP
-  if CheckBoxEnableHPRegen.Checked then
-    if (Brendan.fHP + (Brendan.fHPRate) < TrackBarMaxHP.Position) then
+  {ShowMessage('fHP: ' + FloatToStr(Brendan.fHP) + LineEnding +
+              'fHPRate: ' + FloatToStr(Brendan.fHPRate) + LineEnding +
+              'TrackBarMaxHP.Position: ' + FloatToStr(TrackBarMaxHP.Position)
+              );
+   }
+  if CheckBoxEnableHPRegen.Checked and (Brendan.fHP <> StrToInt(EditMaxHP.Text)) then
+    if ((Brendan.fHP + (Brendan.fHPRate)) <= Single(TrackBarMaxHP.Position+1)) then
     begin
       Brendan.fHP := Brendan.fHP + Brendan.fHPRate;
       WriteFloat(Brendan.fHP, Brendan.dwAddHP);
     end
-    else if (Brendan.fHP - (Brendan.fHPRate) > TrackBarMaxHP.Position) then
+    else if ((Brendan.fHP - (Brendan.fHPRate)) >= Single(TrackBarMaxHP.Position)) then
     begin
       Brendan.fHP := Brendan.fHP - Brendan.fHPRate;
       WriteFloat(Brendan.fHP, Brendan.dwAddHP);
@@ -586,13 +992,13 @@ begin
 
 
   //Regenerate AP
-  if CheckBoxEnableAPRegen.Checked then
-    if (Brendan.fAP + (Brendan.fAPRate) < TrackBarMaxAP.Position) then
+  if CheckBoxEnableAPRegen.Checked and (Brendan.fAP <> StrToInt(EditMaxAP.Text)) then
+    if ((Brendan.fAP + (Brendan.fAPRate)) <= Single(TrackBarMaxAP.Position+1)) then
     begin
       Brendan.fAP := Brendan.fAP + Brendan.fAPRate;
       WriteFloat(Brendan.fAP, Brendan.dwAddAP);
     end
-    else if (Brendan.fAP - (Brendan.fAPRate) > TrackBarMaxAP.Position) then
+    else if ((Brendan.fAP - (Brendan.fAPRate)) >= Single(TrackBarMaxAP.Position)) then
     begin
       Brendan.fAP := Brendan.fAP - Brendan.fAPRate;
       WriteFloat(Brendan.fAP, Brendan.dwAddAP);
@@ -601,27 +1007,34 @@ end;
 
 procedure TForm1.TrackBarAPRateChange(Sender: TObject);
 begin
-  LabelAPRate.Caption := floatToStr((TrackBarAPRate.Position - 1) / 10);
+  LabelAPRate.Caption := floatToStr((TrackBarAPRate.Position) / 10) + '%';
   Brendan.fAPRate := TrackBarAPRate.Position / 1000;
+  if EditAPRate.Text<>'' then
+     EditAPRate.Text:=IntToStr(TrackBarAPRate.Position);
 end;
 
 procedure TForm1.TrackBarHPRateChange(Sender: TObject);
 begin
-  LabelHPRate.Caption := floatToStr((TrackBarHPRate.Position - 1) / 10);
+  LabelHPRate.Caption := floatToStr((TrackBarHPRate.Position) / 10) + '%';
   Brendan.fHPRate := TrackBarHPRate.Position / 1000;
+  if EditHPRate.Text<>'' then
+     EditHPRate.Text:=IntToStr(TrackBarHPRate.Position);
 end;
 
 procedure TForm1.TrackBarMaxAPChange(Sender: TObject);
 begin
   Brendan.fMaxAP := TrackBarMaxAP.Position;
-  LabelMaxAP.Caption := IntToStr(TrackBarMaxAP.Position - 1);
+  LabelMaxAP.Caption := IntToStr(TrackBarMaxAP.Position);
+  if EditMaxAP.Text<>'' then
+     EditMaxAP.Text:=IntToStr(TrackBarMaxAP.Position);
 end;
 
 procedure TForm1.TrackBarMaxHPChange(Sender: TObject);
 begin
   Brendan.fMaxHP := TrackBarMaxHP.Position;
-  LabelMaxHP.Caption := IntToStr(TrackBarMaxHP.Position - 1);
-
+  LabelMaxHP.Caption := IntToStr(TrackBarMaxHP.Position);
+  if EditMaxHP.Text<>'' then
+     EditMaxHP.Text:=IntToStr(TrackBarMaxHP.Position);
 end;
 
 

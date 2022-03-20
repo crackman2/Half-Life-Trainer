@@ -1,22 +1,21 @@
 object Form1: TForm1
-  Left = 1056
-  Height = 494
-  Top = 221
-  Width = 286
+  Left = 686
+  Height = 444
+  Top = 256
+  Width = 233
   BorderStyle = bsDialog
   Caption = 'Half-Life Trainer'
-  ClientHeight = 494
-  ClientWidth = 286
+  ClientHeight = 444
+  ClientWidth = 233
   Color = clMenu
-  DesignTimePPI = 120
   OnCreate = FormCreate
   Position = poScreenCenter
   LCLVersion = '2.0.6.0'
   object Image1: TImage
-    Left = 176
-    Height = 40
-    Top = 376
-    Width = 45
+    Left = 131
+    Height = 32
+    Top = 336
+    Width = 36
     OnClick = Image1Click
     Picture.Data = {
       055449636F6E1EE30000000001000100806E00000100200008E3000016000000
@@ -1841,10 +1840,10 @@ object Form1: TForm1
     Stretch = True
   end
   object TrackBarMaxHP: TTrackBar
-    Left = 11
-    Height = 30
-    Top = 30
-    Width = 267
+    Left = 9
+    Height = 24
+    Top = 32
+    Width = 214
     Max = 1000
     Min = 1
     OnChange = TrackBarMaxHPChange
@@ -1853,28 +1852,28 @@ object Form1: TForm1
     TabOrder = 0
   end
   object Label1: TLabel
-    Left = 11
-    Height = 20
-    Top = 10
-    Width = 54
+    Left = 8
+    Height = 15
+    Top = 16
+    Width = 45
     Caption = 'Max HP:'
     ParentColor = False
     ParentFont = False
   end
   object Label2: TLabel
-    Left = 11
-    Height = 20
-    Top = 70
-    Width = 53
+    Left = 8
+    Height = 15
+    Top = 72
+    Width = 44
     Caption = 'Max AP:'
     ParentColor = False
     ParentFont = False
   end
   object TrackBarMaxAP: TTrackBar
-    Left = 11
-    Height = 30
-    Top = 100
-    Width = 266
+    Left = 9
+    Height = 24
+    Top = 88
+    Width = 214
     Max = 1000
     Min = 1
     OnChange = TrackBarMaxAPChange
@@ -1883,159 +1882,170 @@ object Form1: TForm1
     TabOrder = 1
   end
   object LabelMaxHP: TLabel
-    Left = 92
-    Height = 20
-    Top = 10
-    Width = 8
-    Caption = '0'
+    Left = 200
+    Height = 15
+    Top = 16
+    Width = 18
+    Alignment = taRightJustify
+    BidiMode = bdRightToLeft
+    Caption = '100'
+    ParentBidiMode = False
     ParentColor = False
     ParentFont = False
+    OnClick = LabelMaxHPClick
   end
   object LabelMaxAP: TLabel
-    Left = 92
-    Height = 20
-    Top = 70
-    Width = 8
-    Caption = '0'
+    Left = 200
+    Height = 15
+    Top = 72
+    Width = 18
+    Alignment = taRightJustify
+    BidiMode = bdRightToLeft
+    Caption = '100'
+    ParentBidiMode = False
     ParentColor = False
     ParentFont = False
   end
   object Label5: TLabel
-    Left = 11
-    Height = 20
-    Top = 140
-    Width = 56
+    Left = 8
+    Height = 15
+    Top = 128
+    Width = 45
     Caption = 'HP Rate:'
     ParentColor = False
     ParentFont = False
   end
   object TrackBarHPRate: TTrackBar
-    Left = 11
-    Height = 30
-    Top = 170
-    Width = 267
+    Left = 9
+    Height = 24
+    Top = 144
+    Width = 214
     Max = 1000
     Min = 1
     OnChange = TrackBarHPRateChange
-    Position = 79
+    Position = 80
     ParentFont = False
     TabOrder = 2
   end
   object LabelHPRate: TLabel
-    Left = 92
-    Height = 20
-    Top = 140
-    Width = 8
-    Caption = '0'
+    Left = 192
+    Height = 15
+    Top = 128
+    Width = 18
+    Alignment = taRightJustify
+    BidiMode = bdRightToLeft
+    Caption = '100'
+    ParentBidiMode = False
     ParentColor = False
     ParentFont = False
   end
   object CheckBoxEnableHPRegen: TCheckBox
-    Left = 11
-    Height = 24
-    Top = 320
-    Width = 210
+    Left = 9
+    Height = 19
+    Top = 272
+    Width = 166
     Caption = 'Enable Health Regeneration'
-    Checked = True
     OnChange = CheckBoxEnableHPRegenChange
     ParentFont = False
-    State = cbChecked
     TabOrder = 3
   end
   object Label3: TLabel
-    Left = 11
-    Height = 20
-    Top = 210
-    Width = 55
+    Left = 8
+    Height = 15
+    Top = 184
+    Width = 44
     Caption = 'AP Rate:'
     ParentColor = False
     ParentFont = False
   end
   object LabelAPRate: TLabel
-    Left = 92
-    Height = 20
-    Top = 210
-    Width = 8
-    Caption = '0'
+    Left = 192
+    Height = 15
+    Top = 184
+    Width = 18
+    Alignment = taRightJustify
+    BidiMode = bdRightToLeft
+    Caption = '100'
+    ParentBidiMode = False
     ParentColor = False
     ParentFont = False
   end
   object TrackBarAPRate: TTrackBar
-    Left = 11
-    Height = 30
-    Top = 240
-    Width = 267
+    Left = 9
+    Height = 24
+    Top = 200
+    Width = 214
     Max = 1000
     Min = 1
     OnChange = TrackBarAPRateChange
-    Position = 79
+    Position = 80
     ParentFont = False
     TabOrder = 4
   end
   object CheckBoxEnableAPRegen: TCheckBox
-    Left = 11
-    Height = 24
-    Top = 344
-    Width = 208
+    Left = 9
+    Height = 19
+    Top = 291
+    Width = 165
     Caption = 'Enable Armor Regeneration'
-    Checked = True
     OnChange = CheckBoxEnableAPRegenChange
     ParentFont = False
-    State = cbChecked
     TabOrder = 5
   end
   object ButtonReInit: TButton
-    Left = 11
-    Height = 35
-    Top = 455
-    Width = 118
+    Left = 8
+    Height = 28
+    Top = 408
+    Width = 94
     Caption = 'Reinitialize'
     OnClick = ButtonReInitClick
     ParentFont = False
     TabOrder = 6
   end
   object CheckBoxInfAmmo: TCheckBox
-    Left = 11
-    Height = 24
-    Top = 392
-    Width = 119
+    Left = 9
+    Height = 19
+    Top = 330
+    Width = 97
     Caption = 'Infinite Ammo'
     OnChange = CheckBoxInfAmmoChange
     ParentFont = False
     TabOrder = 7
   end
   object CheckBoxProperRapidfire: TCheckBox
-    Left = 11
-    Height = 24
-    Top = 368
-    Width = 133
-    Caption = 'Proper Rapidfire'
+    Left = 9
+    Height = 19
+    Top = 310
+    Width = 67
+    Caption = 'Rapidfire'
     OnChange = CheckBoxProperRapidfireChange
     ParentFont = False
     TabOrder = 8
   end
   object ButtonHelp: TButton
-    Left = 176
-    Height = 34
-    Top = 456
-    Width = 102
+    Left = 130
+    Height = 27
+    Top = 409
+    Width = 93
     Caption = 'Help'
     OnClick = ButtonHelpClick
+    ParentFont = False
     TabOrder = 9
   end
   object LabelStatus: TLabel
-    Left = 11
-    Height = 20
-    Top = 288
-    Width = 108
+    Left = 9
+    Height = 15
+    Top = 232
+    Width = 88
     Caption = 'Status: *crickets*'
     ParentColor = False
+    ParentFont = False
   end
   object Image2: TImage
-    Left = 232
-    Height = 40
-    Top = 376
-    Width = 44
+    Left = 188
+    Height = 32
+    Top = 336
+    Width = 35
     OnClick = Image2Click
     Picture.Data = {
       055449636F6EBE1000000000010001002020000001002000A810000016000000
@@ -2177,19 +2187,20 @@ object Form1: TForm1
     Stretch = True
   end
   object CheckBoxAutoBhop: TCheckBox
-    Left = 11
-    Height = 24
-    Top = 416
-    Width = 91
+    Left = 9
+    Height = 19
+    Top = 349
+    Width = 74
     Caption = 'AutoBhop'
     OnChange = CheckBoxAutoBhopChange
+    ParentFont = False
     TabOrder = 10
   end
   object Image3: TImage
-    Left = 179
-    Height = 25
-    Top = 424
-    Width = 93
+    Left = 131
+    Height = 28
+    Top = 376
+    Width = 92
     OnClick = Image3Click
     Picture.Data = {
       1754506F727461626C654E6574776F726B477261706869634911000089504E47
@@ -2334,30 +2345,75 @@ object Form1: TForm1
       44AE426082
     }
   end
+  object ButtonEnableAll: TButton
+    Left = 8
+    Height = 28
+    Top = 376
+    Width = 94
+    Caption = 'Enable all'
+    OnClick = ButtonEnableAllClick
+    TabOrder = 11
+  end
+  object EditMaxHP: TEdit
+    Left = 72
+    Height = 23
+    Top = 8
+    Width = 38
+    NumbersOnly = True
+    OnChange = EditMaxHPChange
+    TabOrder = 12
+    Text = '100'
+  end
+  object EditMaxAP: TEdit
+    Left = 72
+    Height = 23
+    Top = 64
+    Width = 38
+    NumbersOnly = True
+    TabOrder = 13
+    Text = '100'
+  end
+  object EditHPRate: TEdit
+    Left = 72
+    Height = 23
+    Top = 120
+    Width = 38
+    NumbersOnly = True
+    TabOrder = 14
+    Text = '8'
+  end
+  object EditAPRate: TEdit
+    Left = 72
+    Height = 23
+    Top = 176
+    Width = 38
+    NumbersOnly = True
+    TabOrder = 15
+    Text = '8'
+  end
   object TimerRegen: TTimer
     Interval = 10
     OnTimer = TimerRegenTimer
-    left = 144
-    top = 64
+    left = 152
+    top = 59
   end
-  object TimerGetRapidFireAddress: TTimer
-    Enabled = False
-    Interval = 500
-    left = 144
-    top = 136
+  object TimerEditRegenCheck: TTimer
+    Interval = 100
+    OnTimer = TimerEditRegenCheckTimer
+    left = 152
+    top = 117
   end
   object TimerGameStatus: TTimer
-    Enabled = False
-    Interval = 5000
+    Interval = 3000
     OnTimer = TimerGameStatusTimer
-    left = 144
-    top = 200
+    left = 152
+    top = 168
   end
   object TimerBhop: TTimer
     Enabled = False
     Interval = 1
     OnTimer = TimerBhopTimer
-    left = 232
-    top = 280
+    left = 152
+    top = 8
   end
 end
