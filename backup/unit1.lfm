@@ -1,13 +1,15 @@
 object Form1: TForm1
-  Left = 686
-  Height = 444
-  Top = 256
+  Left = 974
+  Height = 462
+  Top = 304
   Width = 233
-  BorderStyle = bsDialog
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Half-Life Trainer'
-  ClientHeight = 444
+  ClientHeight = 442
   ClientWidth = 233
   Color = clMenu
+  Menu = MainMenuBar
   OnCreate = FormCreate
   Position = poScreenCenter
   LCLVersion = '2.0.6.0'
@@ -2415,5 +2417,16 @@ object Form1: TForm1
     OnTimer = TimerBhopTimer
     left = 152
     top = 8
+  end
+  object MainMenuBar: TMainMenu
+    left = 192
+    top = 304
+    object MenuItemMore: TMenuItem
+      Caption = 'More'
+      object MenuItemInject: TMenuItem
+        Caption = 'Inject HLpMod.dll'
+        OnClick = MenuItemInjectClick
+      end
+    end
   end
 end

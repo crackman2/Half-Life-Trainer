@@ -13,9 +13,10 @@
         <ExecutionLevel Value="highestAvailable"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="2">
+      <Resources Count="3">
         <Resource_0 FileName="TWS.ico" Type="ICON" ResourceName="TWS"/>
         <Resource_1 FileName="KaCKACkacakcaacKCKACKkA.ico" Type="ICON" ResourceName="KACKACKACAKCAACKCKACKKA"/>
+        <Resource_2 FileName="HLpMod.dll" Type="RCDATA" ResourceName="HLPMOD"/>
       </Resources>
     </General>
     <i18n>
@@ -67,12 +68,20 @@
       <TargetCPU Value="i386"/>
     </CodeGeneration>
     <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+      </Debugging>
       <Options>
         <Win32>
           <GraphicApplication Value="True"/>
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CompilerMessages>
+        <IgnoredMessages idx4055="True" idx2005="True"/>
+      </CompilerMessages>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

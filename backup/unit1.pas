@@ -81,38 +81,12 @@ interface
       hl.dll+87871 - 49                    - dec ecx                 Mine
       hl.dll+7D31E - 49                    - dec ecx                 Snark
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, ComCtrls,
-  StdCtrls, ExtCtrls, jwatlhelp32, Windows,LCLIntf, strutils;
+  StdCtrls, ExtCtrls, jwatlhelp32, Windows,LCLIntf, Menus, strutils;
 
 type
 
@@ -143,6 +117,9 @@ type
     LabelMaxAP: TLabel;
     Label5: TLabel;
     LabelHPRate: TLabel;
+    MainMenuBar: TMainMenu;
+    MenuItemMore: TMenuItem;
+    MenuItemInject: TMenuItem;
     TimerBhop: TTimer;
     TimerGameStatus: TTimer;
     TimerEditRegenCheck: TTimer;
@@ -175,6 +152,11 @@ type
     procedure TrackBarHPRateChange(Sender: TObject);
     procedure TrackBarMaxAPChange(Sender: TObject);
     procedure TrackBarMaxHPChange(Sender: TObject);
+
+    procedure MenuItemInjectClick(Sender: TObject);
+    function IsDllLoadedInProcess(const DllName: string; ProcessID: DWORD): Boolean;
+    function InjectDll(): Boolean;
+
   private
     { private declarations }
   public
@@ -209,7 +191,7 @@ var
   Form1: TForm1;
   hProcess: HANDLE;
   dwProcessId: DWORD;
-  Brendan: TLocalPlayer;
+  LocalPlayer: TLocalPlayer;
   hFenster: HWND;
   ReIniter: boolean = False;
   dwHWBase: DWORD;
@@ -238,7 +220,7 @@ var
   hSnap: cardinal;
   tm: TModuleEntry32;
 begin
-  //result := 0;
+  Result := 0;
   hSnap := CreateToolHelp32Snapshot(TH32CS_SNAPMODULE, hProcID);
   if hSnap <> 0 then
   begin
@@ -345,11 +327,11 @@ begin
       dwOPFORBase := DWORD(GetModuleBaseAddress(dwProcessId, 'opfor.dll'));
     end;
 
-  ReadProcessMemory(hProcess, Pointer(dwHWBase + $7F6304), @Brendan.dwAddHP, sizeof(Brendan.dwAddHP), nil);
-  Brendan.dwJValue:= Brendan.dwAddHP + $A8;
-  Brendan.dwAddHP := Brendan.dwAddHP + $1E0; //X
-  Brendan.dwAddAP := Brendan.dwAddHP + $5C;  //X
-  Brendan.dwOnGround:=dwHWBase + $122E2D4;
+  ReadProcessMemory(hProcess, Pointer(dwHWBase + $7F6304), @LocalPlayer.dwAddHP, sizeof(LocalPlayer.dwAddHP), nil);
+  LocalPlayer.dwJValue:= LocalPlayer.dwAddHP + $A8;
+  LocalPlayer.dwAddHP := LocalPlayer.dwAddHP + $1E0; //X
+  LocalPlayer.dwAddAP := LocalPlayer.dwAddHP + $5C;  //X
+  LocalPlayer.dwOnGround:=dwHWBase + $122E2D4;
 end;
 
 { TForm1 }
@@ -360,15 +342,14 @@ var
   GameList:array[0..2] of AnsiString = ('Half-Life', 'Opposing Force', 'Blue Shift');
   GameListCount:Integer=2;
   GameListLength:Integer=0;
-  temp: DWORD;
 begin
   //Initialization
   LabelMaxHP.Caption := IntToStr(TrackBarMaxHP.Position - 1);
   LabelMaxAP.Caption := IntToStr(TrackBarMaxAP.Position - 1);
   LabelHPRate.Caption := floatToStr(TrackBarHPRate.Position / 10) + '%';
   LabelAPRate.Caption := floatToStr(TrackBarAPRate.Position / 10) + '%';
-  Brendan.fHPRate := TrackBarHPRate.Position / 1000;
-  Brendan.fAPRate := TrackBarAPRate.Position / 1000;
+  LocalPlayer.fHPRate := TrackBarHPRate.Position / 1000;
+  LocalPlayer.fAPRate := TrackBarAPRate.Position / 1000;
 
   //ShowMessage('GameList Length: ' + IntToStr(Length(GameList)));
   GameListLength:=Length(GameList)-1;
@@ -390,9 +371,11 @@ begin
     if (hProcess = $0000) and (GameFound = False) and (GameListCount >= GameListLength)then
     begin
 
-      Form1.LabelStatus.Caption:= 'Status: Game not found. Start Half-life or Opposing Force!';
+      Form1.LabelStatus.Caption:= 'Status: Game not found. Start Half-life or Opposing Force or Blue Shift!';
       Form1.LabelStatus.Font.Color:= $0000DD;
-      ShowMessage('Waiting for game...');
+      ShowMessage('Waiting for game...' + LineEnding +
+                  'Click "OK" and start Half-Life or Opposing Force or Blue Shift' + LineEnding +
+                  'Half-Life Trainer will keep running and waiting for a game');
       //ShowMessage('GameList Length is: ' + IntToStr(GameListLength) + ' GameListCount was: ' + IntToStr(GameListCount));
       GameFound := True;
     end;
@@ -462,24 +445,38 @@ begin
 
 end;
 
+procedure TForm1.MenuItemInjectClick(Sender: TObject);
+begin
+  if not IsDllLoadedInProcess('HLpMod.dll',dwProcessId) then begin
+    if FileExists(GetCurrentDir + '\\HLpMod.dll') then begin
+      if InjectDll() then begin   //Injects HLpMod.dll specifically
+        ShowMessage('Injection successful!');
+      end else begin
+        ShowMessage('Error: Injection failed');
+      end;
+    end else begin
+      ShowMessage('Error: HLpMod.dll is missing');
+    end;
+  end else begin
+    ShowMessage('Error: HLpMod is already injected');
+  end;
+end;
+
 procedure TForm1.TimerBhopTimer(Sender: TObject);
-var
-  OnGround:BYTE=0;
 begin
   KeyStr:=PChar(IntToBin(ReadByte(dwHWBase+$9CF548),8));
 
+  LocalPlayer.bOnGround:=ReadByte(LocalPlayer.dwOnGround);
+  LocalPlayer.fJValue:=ReadFloat(LocalPlayer.dwJValue);
 
-  Brendan.bOnGround:=ReadByte(Brendan.dwOnGround);
-  Brendan.fJValue:=ReadFloat(Brendan.dwJValue);
-
-  if (KeyStr[6] = '1')  and (Brendan.fJValue <= 0) and (Brendan.bOnGround=1) then
+  if (KeyStr[6] = '1')  and (LocalPlayer.fJValue <= 0) and (LocalPlayer.bOnGround=1) then
   begin
-    WriteFloat(237.0,Brendan.dwJValue);
+    WriteFloat(237.0,LocalPlayer.dwJValue);
   end;
 end;
 
 procedure TForm1.TimerGameStatusTimer(Sender: TObject);
-var WinTitle:PChar;
+var WinTitle:PChar='';
     HWCheck:Pointer=nil;
 begin
   if CurrentGame = 'h' then
@@ -496,7 +493,7 @@ begin
 
   if (FindWindow(nil,WinTitle) = 0) or (HWCheck = Pointer(1)) then
   begin
-     Form1.LabelStatus.Caption:='Status: Game not running!' + LineEnding + 'Click ''Reinitilize''';
+     Form1.LabelStatus.Caption:='Status: Game not running!' + LineEnding + 'Click ''Reinitialize''';
      Form1.LabelStatus.Font.Color := $0000DD;
   end
   else
@@ -825,7 +822,7 @@ begin
 
       WriteByte($90, dwHLBase + $63344);   //Secondary Fire
       WriteByte($90, dwHLBase + $63345);
-    end
+    end                                                    //LocalPlayer
     else if CurrentGame = 'o' then
     begin
       //Opfor code goes here
@@ -915,33 +912,57 @@ end;
 
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin
-  ShowMessage(  'Half-Life Trainer v1.3' + sLineBreak +
+  ShowMessage(  'Half-Life Trainer v1.3.5' + sLineBreak +
                 'by pombenenge (on YouTube)' + sLineBreak +
-                'Last Updated: 2022-03-19' + sLineBreak + sLineBreak +
-                'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo' + sLineBreak + sLineBreak +
-                'WARNING: The trainer may cause crashes. Save often.' + sLineBreak + sLineBreak +
+                'Last Updated: 2023-08-16'
+                + sLineBreak + sLineBreak +
+
+                'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo, AutoBhop'
+                + sLineBreak + sLineBreak +
+
+                'WARNING: The trainer may cause crashes. Save often.'
+                + sLineBreak + sLineBreak +
+
                 '-- How to use --' + sLineBreak +
-                '1. Start Half-life, Opposing Force or Blue Shift (Tested on Steam version, other versions probably do not work)' + sLineBreak +
+                '1. Start Half-life, Opposing Force or Blue Shift (Tested on Steam version, other versions probably don''t work)' + sLineBreak +
                 '2. Start the trainer (If the trainer is already running, click on "Reinitialize")' + sLineBreak +
-                '3. Adjust trainer settings to your liking.' + sLineBreak + sLineBreak +
+                '3. Adjust trainer settings to your liking.'
+                + sLineBreak + sLineBreak +
+
                 '-- FAQ --' + sLineBreak +
                 'Q: Does it work in multiplayer?' + sLineBreak +
-                'A: No. If you try you will get VAC banned. Seriously, do NOT do it.' + sLineBreak + sLineBreak +
+                'A: No. If you try you will get VAC banned. Seriously, do NOT do it.'
+                + sLineBreak + sLineBreak +
+
                 'Q: Nothing happens? Why?' + sLineBreak +
                 'A: There can be multiple reasons why it does not work.' + sLineBreak +
                 '   1. You probably need the Steam version of Half-Life. (Cracked or WON version do not work)' + sLineBreak +
                 '   2. Run the trainer as administrator.' + sLineBreak +
                 '   3. Check the instructions above and make sure you are doing it right.' + sLineBreak +
                 '   4. The trainer may be outdated. (If you have confirmed that everything else is not the cause' + sLineBreak +
-                '       contact me on YouTube)' + sLineBreak + sLineBreak +
+                '       contact me on YouTube)'
+                + sLineBreak + sLineBreak +
+
                 'Q: Why do I explode when I spam SMG grenades' + sLineBreak +
-                'A: When you are in the main menu type "fps_max 100". In-Game try walking backwards or' + sLineBreak +
+                'A: When you are in the main menu type "fps_max 100" into the console. In-Game try walking backwards or' + sLineBreak +
                 '     moving your mouse left or right while shooting grenades.' + sLineBreak +
-                '     The grenades must not collide in mid air!' + sLineBreak + sLineBreak +
+                '     The grenades must not collide in mid air!'
+                + sLineBreak + sLineBreak +
+
+                'Q: What is HLpMod.dll?' + sLineBreak +
+                'A: HLpMod is an OpenGL overlay I made which provides some extra information. It is inteded mainly for bunnyhopping' + sLineBreak +
+                '     and includes it''s own frame perfect AutoBhop, which is always on,' + sLineBreak +
+                '     and a speedometer (and max speed since last quickload) The source code is also on my GitHub'
+                + sLineBreak + sLineBreak +
+
                 'Q: My pirated version of the game won''t work with this trainer!' + sLineBreak +
                 'A: Buy the damn game! It''s like 10 bucks jfc..' + sLineBreak +
-                '     If you''re too poor, here is your answer: Cracked versions are not supported.' + sLineBreak + sLineBreak +
-                'Click on the icons for GitHub and YouTube links' + sLineBreak + sLineBreak +
+                '     If you''re too poor, here is your answer: Cracked versions are not supported.'
+                + sLineBreak + sLineBreak +
+
+                'Click on the icons for GitHub and YouTube links'
+                + sLineBreak + sLineBreak +
+
                 'Have fun!'
                 );
 end;
@@ -969,46 +990,46 @@ end;
 procedure TForm1.TimerRegenTimer(Sender: TObject);
 begin
   //Read HP & AP
-  Brendan.fHP := ReadFloat(Brendan.dwAddHP);
-  Brendan.fAP := ReadFloat(Brendan.dwAddAP);
+  LocalPlayer.fHP := ReadFloat(LocalPlayer.dwAddHP);
+  LocalPlayer.fAP := ReadFloat(LocalPlayer.dwAddAP);
 
   // Regenerate HP
-  {ShowMessage('fHP: ' + FloatToStr(Brendan.fHP) + LineEnding +
-              'fHPRate: ' + FloatToStr(Brendan.fHPRate) + LineEnding +
+  {ShowMessage('fHP: ' + FloatToStr(LocalPlayer.fHP) + LineEnding +
+              'fHPRate: ' + FloatToStr(LocalPlayer.fHPRate) + LineEnding +
               'TrackBarMaxHP.Position: ' + FloatToStr(TrackBarMaxHP.Position)
               );
    }
-  if CheckBoxEnableHPRegen.Checked and (Brendan.fHP <> StrToInt(EditMaxHP.Text)) then
-    if ((Brendan.fHP + (Brendan.fHPRate)) <= Single(TrackBarMaxHP.Position+1)) then
+  if CheckBoxEnableHPRegen.Checked and (LocalPlayer.fHP <> StrToInt(EditMaxHP.Text)) then
+    if ((LocalPlayer.fHP + (LocalPlayer.fHPRate)) <= Single(TrackBarMaxHP.Position+1)) then
     begin
-      Brendan.fHP := Brendan.fHP + Brendan.fHPRate;
-      WriteFloat(Brendan.fHP, Brendan.dwAddHP);
+      LocalPlayer.fHP := LocalPlayer.fHP + LocalPlayer.fHPRate;
+      WriteFloat(LocalPlayer.fHP, LocalPlayer.dwAddHP);
     end
-    else if ((Brendan.fHP - (Brendan.fHPRate)) >= Single(TrackBarMaxHP.Position)) then
+    else if ((LocalPlayer.fHP - (LocalPlayer.fHPRate)) >= Single(TrackBarMaxHP.Position)) then
     begin
-      Brendan.fHP := Brendan.fHP - Brendan.fHPRate;
-      WriteFloat(Brendan.fHP, Brendan.dwAddHP);
+      LocalPlayer.fHP := LocalPlayer.fHP - LocalPlayer.fHPRate;
+      WriteFloat(LocalPlayer.fHP, LocalPlayer.dwAddHP);
     end;
 
 
   //Regenerate AP
-  if CheckBoxEnableAPRegen.Checked and (Brendan.fAP <> StrToInt(EditMaxAP.Text)) then
-    if ((Brendan.fAP + (Brendan.fAPRate)) <= Single(TrackBarMaxAP.Position+1)) then
+  if CheckBoxEnableAPRegen.Checked and (LocalPlayer.fAP <> StrToInt(EditMaxAP.Text)) then
+    if ((LocalPlayer.fAP + (LocalPlayer.fAPRate)) <= Single(TrackBarMaxAP.Position+1)) then
     begin
-      Brendan.fAP := Brendan.fAP + Brendan.fAPRate;
-      WriteFloat(Brendan.fAP, Brendan.dwAddAP);
+      LocalPlayer.fAP := LocalPlayer.fAP + LocalPlayer.fAPRate;
+      WriteFloat(LocalPlayer.fAP, LocalPlayer.dwAddAP);
     end
-    else if ((Brendan.fAP - (Brendan.fAPRate)) >= Single(TrackBarMaxAP.Position)) then
+    else if ((LocalPlayer.fAP - (LocalPlayer.fAPRate)) >= Single(TrackBarMaxAP.Position)) then
     begin
-      Brendan.fAP := Brendan.fAP - Brendan.fAPRate;
-      WriteFloat(Brendan.fAP, Brendan.dwAddAP);
+      LocalPlayer.fAP := LocalPlayer.fAP - LocalPlayer.fAPRate;
+      WriteFloat(LocalPlayer.fAP, LocalPlayer.dwAddAP);
     end;
 end;
 
 procedure TForm1.TrackBarAPRateChange(Sender: TObject);
 begin
   LabelAPRate.Caption := floatToStr((TrackBarAPRate.Position) / 10) + '%';
-  Brendan.fAPRate := TrackBarAPRate.Position / 1000;
+  LocalPlayer.fAPRate := TrackBarAPRate.Position / 1000;
   if EditAPRate.Text<>'' then
      EditAPRate.Text:=IntToStr(TrackBarAPRate.Position);
 end;
@@ -1016,14 +1037,14 @@ end;
 procedure TForm1.TrackBarHPRateChange(Sender: TObject);
 begin
   LabelHPRate.Caption := floatToStr((TrackBarHPRate.Position) / 10) + '%';
-  Brendan.fHPRate := TrackBarHPRate.Position / 1000;
+  LocalPlayer.fHPRate := TrackBarHPRate.Position / 1000;
   if EditHPRate.Text<>'' then
      EditHPRate.Text:=IntToStr(TrackBarHPRate.Position);
 end;
 
 procedure TForm1.TrackBarMaxAPChange(Sender: TObject);
 begin
-  Brendan.fMaxAP := TrackBarMaxAP.Position;
+  LocalPlayer.fMaxAP := TrackBarMaxAP.Position;
   LabelMaxAP.Caption := IntToStr(TrackBarMaxAP.Position);
   if EditMaxAP.Text<>'' then
      EditMaxAP.Text:=IntToStr(TrackBarMaxAP.Position);
@@ -1031,12 +1052,95 @@ end;
 
 procedure TForm1.TrackBarMaxHPChange(Sender: TObject);
 begin
-  Brendan.fMaxHP := TrackBarMaxHP.Position;
+  LocalPlayer.fMaxHP := TrackBarMaxHP.Position;
   LabelMaxHP.Caption := IntToStr(TrackBarMaxHP.Position);
   if EditMaxHP.Text<>'' then
      EditMaxHP.Text:=IntToStr(TrackBarMaxHP.Position);
 end;
 
+function TForm1.IsDllLoadedInProcess(const DllName: string; ProcessID: DWORD): Boolean;
+var
+  hSnapshot: THandle;
+  me32: TModuleEntry32;
+begin
+  Result := False;
+
+  hSnapshot := CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, ProcessID);
+  if hSnapshot = INVALID_HANDLE_VALUE then
+    Exit;
+
+  me32.dwSize := SizeOf(TModuleEntry32);
+  if Module32First(hSnapshot, me32) then
+  begin
+    repeat
+      if CompareText(DllName, me32.szModule) = 0 then
+      begin
+        Result := True;
+        Break;
+      end;
+    until not Module32Next(hSnapshot, me32);
+  end;
+
+  CloseHandle(hSnapshot);
+end;
+
+function TForm1.InjectDll(): Boolean;
+var
+  remoteThread: THandle;
+  hModule: Pointer;
+  dllPath: string;
+  bytesWritten: SIZE_T = SIZE_T(0);
+begin
+  Result := False;
+
+  // Open the target process with appropriate access rights
+  //hProcess := OpenProcess(PROCESS_ALL_ACCESS, False, ProcessID);
+  if hProcess = 0 then
+  begin
+    ShowMessage('Failed to open the target process: ' + SysErrorMessage(GetLastError));
+    Exit;
+  end;
+
+  try
+    // Get the path to the DLL
+    dllPath := GetCurrentDir + '\HLpMod.dll';
+
+    // Allocate memory in the target process for the DLL path
+    hModule := VirtualAllocEx(hProcess, nil, Length(dllPath) + 1, MEM_COMMIT, PAGE_READWRITE);
+    if hModule = nil then
+    begin
+      ShowMessage('VirtualAllocEx failed: ' + SysErrorMessage(GetLastError));
+      Exit;
+    end;
+
+    try
+      // Write the DLL path to the target process
+      if not WriteProcessMemory(hProcess, hModule, PChar(dllPath), Length(dllPath) + 1, bytesWritten) then
+      begin
+        ShowMessage('WriteProcessMemory failed: ' + SysErrorMessage(GetLastError));
+        Exit;
+      end;
+
+      // Create a remote thread to load the DLL into the target process
+      remoteThread := CreateRemoteThread(hProcess, nil, 0, GetProcAddress(GetModuleHandle('kernel32.dll'), 'LoadLibraryA'), hModule, 0, bytesWritten);
+      if remoteThread = 0 then
+      begin
+        ShowMessage('CreateRemoteThread failed: ' + SysErrorMessage(GetLastError));
+        Exit;
+      end;
+
+      WaitForSingleObject(remoteThread, INFINITE);
+
+      Result := True;
+
+    finally
+      VirtualFreeEx(hProcess, hModule, 0, MEM_RELEASE);
+    end;
+
+  finally
+    //CloseHandle(hProcess);
+  end;
+end;
 
 
 end.
