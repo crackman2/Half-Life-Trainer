@@ -107,7 +107,6 @@ type
     EditAPRate: TEdit;
     Image1: TImage;
     Image2: TImage;
-    Image3: TImage;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
@@ -142,7 +141,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Image1Click(Sender: TObject);
     procedure Image2Click(Sender: TObject);
-    procedure Image3Click(Sender: TObject);
     procedure LabelMaxHPClick(Sender: TObject);
     procedure TimerBhopTimer(Sender: TObject);
     procedure TimerGameStatusTimer(Sender: TObject);
@@ -435,11 +433,6 @@ begin
   OpenURL('https://www.youtube.com/user/pombenenge');
 end;
 
-procedure TForm1.Image3Click(Sender: TObject);
-begin
-  OpenURL('https://www.paypal.com/donate?hosted_button_id=24RWVGKZGRVMW');
-end;
-
 procedure TForm1.LabelMaxHPClick(Sender: TObject);
 begin
 
@@ -451,6 +444,9 @@ begin
     if FileExists(GetCurrentDir + '\\HLpMod.dll') then begin
       if InjectDll() then begin   //Injects HLpMod.dll specifically
         ShowMessage('Injection successful!');
+        TimerBhop.Enabled:=False;
+        CheckBoxAutoBhop.Checked:=False;
+        CheckBoxAutoBhop.Enabled:=False;
       end else begin
         ShowMessage('Error: Injection failed');
       end;
@@ -888,14 +884,23 @@ begin
 
   CheckBoxProperRapidfire.Checked := False;
   CheckBoxInfAmmo.Checked := False;
+  CheckBoxAutoBhop.Enabled:= True;
   ReIniter := True;
   FormCreate(nil);
 end;
 
 procedure TForm1.CheckBoxAutoBhopChange(Sender: TObject);
 begin
-  if CheckBoxAutoBhop.Checked then
-     TimerBhop.Enabled:=True
+  if CheckBoxAutoBhop.Checked then begin
+       if not IsDllLoadedInProcess('HLpMod.dll',dwProcessId) then begin
+         TimerBhop.Enabled:=True;
+       end else begin
+         CheckBoxAutoBhop.Checked:=False;
+         CheckBoxAutoBhop.Enabled:=False;
+         ShowMessage('Error: Can''t enable AutoBhop' + sLineBreak +
+                     '          HLpMod has its own AutoBhop');
+       end;
+     end
      else
      TimerBhop.Enabled:=False;
 end;
