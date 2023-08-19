@@ -1,18 +1,18 @@
 object Form1: TForm1
-  Left = 974
-  Height = 462
-  Top = 304
+  Left = 434
+  Height = 533
+  Top = 193
   Width = 233
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Half-Life Trainer'
-  ClientHeight = 442
+  ClientHeight = 513
   ClientWidth = 233
   Color = clMenu
   Menu = MainMenuBar
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '2.2.6.0'
   object Image1: TImage
     Left = 130
     Height = 32
@@ -1894,7 +1894,6 @@ object Form1: TForm1
     ParentBidiMode = False
     ParentColor = False
     ParentFont = False
-    OnClick = LabelMaxHPClick
   end
   object LabelMaxAP: TLabel
     Left = 200
@@ -1945,9 +1944,8 @@ object Form1: TForm1
     Left = 9
     Height = 19
     Top = 272
-    Width = 166
-    Caption = 'Enable Health Regeneration'
-    OnChange = CheckBoxEnableHPRegenChange
+    Width = 128
+    Caption = 'Health Regeneration'
     ParentFont = False
     TabOrder = 3
   end
@@ -1988,9 +1986,8 @@ object Form1: TForm1
     Left = 9
     Height = 19
     Top = 291
-    Width = 165
-    Caption = 'Enable Armor Regeneration'
-    OnChange = CheckBoxEnableAPRegenChange
+    Width = 127
+    Caption = 'Armor Regeneration'
     ParentFont = False
     TabOrder = 5
   end
@@ -2028,7 +2025,7 @@ object Form1: TForm1
     Left = 130
     Height = 27
     Top = 409
-    Width = 93
+    Width = 94
     Caption = 'Help'
     OnClick = ButtonHelpClick
     ParentFont = False
@@ -2213,7 +2210,6 @@ object Form1: TForm1
     Top = 8
     Width = 38
     NumbersOnly = True
-    OnChange = EditMaxHPChange
     TabOrder = 12
     Text = '100'
   end
@@ -2244,34 +2240,42 @@ object Form1: TForm1
     TabOrder = 15
     Text = '8'
   end
+  object ListBoxLog: TListBox
+    Left = 9
+    Height = 65
+    Top = 440
+    Width = 214
+    ItemHeight = 0
+    TabOrder = 16
+  end
   object TimerRegen: TTimer
     Interval = 10
     OnTimer = TimerRegenTimer
-    left = 152
-    top = 59
+    Left = 152
+    Top = 59
   end
   object TimerEditRegenCheck: TTimer
     Interval = 100
     OnTimer = TimerEditRegenCheckTimer
-    left = 152
-    top = 117
+    Left = 152
+    Top = 117
   end
   object TimerGameStatus: TTimer
     Interval = 3000
     OnTimer = TimerGameStatusTimer
-    left = 152
-    top = 168
+    Left = 152
+    Top = 168
   end
   object TimerBhop: TTimer
     Enabled = False
     Interval = 1
     OnTimer = TimerBhopTimer
-    left = 152
-    top = 8
+    Left = 152
+    Top = 8
   end
   object MainMenuBar: TMainMenu
-    left = 160
-    top = 320
+    Left = 136
+    Top = 320
     object MenuItemMore: TMenuItem
       Caption = 'More'
       object MenuItemInject: TMenuItem

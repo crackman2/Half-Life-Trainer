@@ -141,7 +141,6 @@ type
     procedure FormCreate(Sender: TObject);
     procedure Image1Click(Sender: TObject);
     procedure Image2Click(Sender: TObject);
-    procedure Image3Click(Sender: TObject);
     procedure LabelMaxHPClick(Sender: TObject);
     procedure TimerBhopTimer(Sender: TObject);
     procedure TimerGameStatusTimer(Sender: TObject);
@@ -432,11 +431,6 @@ end;
 procedure TForm1.Image2Click(Sender: TObject);
 begin
   OpenURL('https://www.youtube.com/user/pombenenge');
-end;
-
-procedure TForm1.LabelMaxHPClick(Sender: TObject);
-begin
-
 end;
 
 procedure TForm1.MenuItemInjectClick(Sender: TObject);
@@ -872,12 +866,6 @@ begin
 
 end;
 
-procedure TForm1.EditMaxHPChange(Sender: TObject);
-begin
-
-end;
-
-
 
 procedure TForm1.ButtonReInitClick(Sender: TObject);
 begin
@@ -906,15 +894,6 @@ begin
      TimerBhop.Enabled:=False;
 end;
 
-procedure TForm1.CheckBoxEnableAPRegenChange(Sender: TObject);
-begin
-
-end;
-
-procedure TForm1.CheckBoxEnableHPRegenChange(Sender: TObject);
-begin
-
-end;
 
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin

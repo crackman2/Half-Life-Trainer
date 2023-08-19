@@ -12,7 +12,7 @@ object Form1: TForm1
   Menu = MainMenuBar
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '2.0.6.0'
+  LCLVersion = '2.2.6.0'
   object Image1: TImage
     Left = 130
     Height = 32
@@ -1894,7 +1894,6 @@ object Form1: TForm1
     ParentBidiMode = False
     ParentColor = False
     ParentFont = False
-    OnClick = LabelMaxHPClick
   end
   object LabelMaxAP: TLabel
     Left = 200
@@ -1947,7 +1946,6 @@ object Form1: TForm1
     Top = 272
     Width = 166
     Caption = 'Enable Health Regeneration'
-    OnChange = CheckBoxEnableHPRegenChange
     ParentFont = False
     TabOrder = 3
   end
@@ -1990,7 +1988,6 @@ object Form1: TForm1
     Top = 291
     Width = 165
     Caption = 'Enable Armor Regeneration'
-    OnChange = CheckBoxEnableAPRegenChange
     ParentFont = False
     TabOrder = 5
   end
@@ -2213,7 +2210,6 @@ object Form1: TForm1
     Top = 8
     Width = 38
     NumbersOnly = True
-    OnChange = EditMaxHPChange
     TabOrder = 12
     Text = '100'
   end
@@ -2247,31 +2243,31 @@ object Form1: TForm1
   object TimerRegen: TTimer
     Interval = 10
     OnTimer = TimerRegenTimer
-    left = 152
-    top = 59
+    Left = 152
+    Top = 59
   end
   object TimerEditRegenCheck: TTimer
     Interval = 100
     OnTimer = TimerEditRegenCheckTimer
-    left = 152
-    top = 117
+    Left = 152
+    Top = 117
   end
   object TimerGameStatus: TTimer
     Interval = 3000
     OnTimer = TimerGameStatusTimer
-    left = 152
-    top = 168
+    Left = 152
+    Top = 168
   end
   object TimerBhop: TTimer
     Enabled = False
     Interval = 1
     OnTimer = TimerBhopTimer
-    left = 152
-    top = 8
+    Left = 152
+    Top = 8
   end
   object MainMenuBar: TMainMenu
-    left = 160
-    top = 320
+    Left = 160
+    Top = 320
     object MenuItemMore: TMenuItem
       Caption = 'More'
       object MenuItemInject: TMenuItem
