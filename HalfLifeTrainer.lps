@@ -4,13 +4,13 @@
     <PathDelim Value="\"/>
     <Version Value="12"/>
     <BuildModes Active="Default"/>
-    <Units Count="18">
+    <Units Count="27">
       <Unit0>
         <Filename Value="HalfLifeTrainer.lpr"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="2"/>
+        <EditorIndex Value="5"/>
         <CursorPos X="37" Y="6"/>
-        <UsageCount Value="185"/>
+        <UsageCount Value="193"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -20,9 +20,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="Main"/>
-        <TopLine Value="289"/>
-        <CursorPos X="43" Y="282"/>
-        <UsageCount Value="185"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="297"/>
+        <CursorPos Y="314"/>
+        <UsageCount Value="193"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -30,48 +31,47 @@
         <Filename Value="cprocmem.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="CProcMem"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="125"/>
-        <CursorPos X="68" Y="143"/>
-        <UsageCount Value="39"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="88"/>
+        <CursorPos Y="115"/>
+        <UsageCount Value="47"/>
         <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="G:\lazarus\lcl\include\customcheckbox.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="113"/>
-        <CursorPos Y="134"/>
-        <UsageCount Value="41"/>
+        <TopLine Value="236"/>
+        <CursorPos Y="257"/>
+        <UsageCount Value="39"/>
       </Unit3>
       <Unit4>
         <Filename Value="G:\lazarus\lcl\include\wincontrol.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="7414"/>
-        <CursorPos Y="7436"/>
-        <UsageCount Value="41"/>
+        <TopLine Value="5417"/>
+        <CursorPos Y="5434"/>
+        <UsageCount Value="39"/>
       </Unit4>
       <Unit5>
         <Filename Value="G:\lazarus\fpc\3.0.4\source\rtl\win\wininc\ascdef.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="248"/>
         <CursorPos X="10" Y="274"/>
-        <UsageCount Value="26"/>
+        <UsageCount Value="24"/>
       </Unit5>
       <Unit6>
         <Filename Value="unit1.lfm"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2230"/>
         <CursorPos X="50" Y="2246"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="13"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
       </Unit6>
       <Unit7>
         <Filename Value="G:\lazarus\lcl\include\control.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="5112"/>
-        <CursorPos Y="5128"/>
-        <UsageCount Value="15"/>
+        <TopLine Value="589"/>
+        <CursorPos Y="617"/>
+        <UsageCount Value="13"/>
       </Unit7>
       <Unit8>
         <Filename Value="G:\lazarus\lcl\customtimer.pas"/>
@@ -79,21 +79,21 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="179"/>
         <CursorPos Y="196"/>
-        <UsageCount Value="15"/>
+        <UsageCount Value="13"/>
       </Unit8>
       <Unit9>
         <Filename Value="G:\lazarus\lcl\interfaces\win32\win32object.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="610"/>
-        <CursorPos Y="638"/>
-        <UsageCount Value="15"/>
+        <TopLine Value="586"/>
+        <CursorPos Y="614"/>
+        <UsageCount Value="13"/>
       </Unit9>
       <Unit10>
         <Filename Value="G:\lazarus\lcl\include\font.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="909"/>
         <CursorPos Y="926"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit10>
       <Unit11>
         <Filename Value="G:\lazarus\lcl\graphics.pp"/>
@@ -101,14 +101,14 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="2658"/>
         <CursorPos Y="2677"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit11>
       <Unit12>
         <Filename Value="G:\lazarus\lcl\include\messagedialogs.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="190"/>
         <CursorPos Y="208"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit12>
       <Unit13>
         <Filename Value="G:\lazarus\components\lazutils\lazstringutils.pas"/>
@@ -116,28 +116,28 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="266"/>
         <CursorPos Y="295"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit13>
       <Unit14>
         <Filename Value="G:\lazarus\lcl\include\lclintf.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="338"/>
         <CursorPos Y="355"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit14>
       <Unit15>
         <Filename Value="G:\lazarus\lcl\interfaces\win32\win32lclintf.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="716"/>
         <CursorPos Y="744"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit15>
       <Unit16>
         <Filename Value="G:\lazarus\lcl\include\application.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1138"/>
         <CursorPos Y="1159"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit16>
       <Unit17>
         <Filename Value="G:\lazarus\components\lazutils\lazutf8.pas"/>
@@ -145,106 +145,190 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="3871"/>
         <CursorPos Y="3891"/>
-        <UsageCount Value="13"/>
+        <UsageCount Value="11"/>
       </Unit17>
+      <Unit18>
+        <Filename Value="cgamehl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CgameHL"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="66"/>
+        <CursorPos X="20" Y="113"/>
+        <UsageCount Value="27"/>
+        <Loaded Value="True"/>
+      </Unit18>
+      <Unit19>
+        <Filename Value="cgameop.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CgameOP"/>
+        <EditorIndex Value="2"/>
+        <TopLine Value="22"/>
+        <CursorPos X="46" Y="44"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
+      </Unit19>
+      <Unit20>
+        <Filename Value="cgamebs.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CgameBS"/>
+        <EditorIndex Value="1"/>
+        <CursorPos Y="44"/>
+        <UsageCount Value="26"/>
+        <Loaded Value="True"/>
+      </Unit20>
+      <Unit21>
+        <Filename Value="G:\lazarus\lcl\include\customlistbox.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="625"/>
+        <CursorPos Y="632"/>
+        <UsageCount Value="10"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="G:\lazarus\lcl\interfaces\win32\win32listsl.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="153"/>
+        <CursorPos Y="171"/>
+        <UsageCount Value="10"/>
+      </Unit22>
+      <Unit23>
+        <Filename Value="G:\lazarus\lcl\interfaces\win32\win32wsstdctrls.pp"/>
+        <UnitName Value="Win32WSStdCtrls"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1997"/>
+        <CursorPos Y="2020"/>
+        <UsageCount Value="10"/>
+      </Unit23>
+      <Unit24>
+        <Filename Value="G:\lazarus\lcl\include\winapi.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="828"/>
+        <CursorPos Y="846"/>
+        <UsageCount Value="10"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="G:\lazarus\lcl\interfaces\win32\win32winapi.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="3123"/>
+        <CursorPos Y="3141"/>
+        <UsageCount Value="10"/>
+      </Unit25>
+      <Unit26>
+        <Filename Value="G:\lazarus\lcl\include\buttoncontrol.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="37"/>
+        <CursorPos Y="49"/>
+        <UsageCount Value="10"/>
+      </Unit26>
     </Units>
-    <JumpHistory Count="24" HistoryIndex="23">
+    <JumpHistory Count="27" HistoryIndex="26">
       <Position1>
         <Filename Value="main.pas"/>
-        <Caret Line="276" TopLine="250"/>
+        <Caret Line="553" Column="47" TopLine="637"/>
       </Position1>
       <Position2>
         <Filename Value="main.pas"/>
-        <Caret Line="281" TopLine="253"/>
+        <Caret Line="293" TopLine="281"/>
       </Position2>
       <Position3>
         <Filename Value="main.pas"/>
-        <Caret Line="283" TopLine="256"/>
+        <Caret Line="303" Column="19" TopLine="281"/>
       </Position3>
       <Position4>
         <Filename Value="main.pas"/>
-        <Caret Line="284" TopLine="256"/>
+        <Caret Line="707" Column="44" TopLine="689"/>
       </Position4>
       <Position5>
         <Filename Value="main.pas"/>
-        <Caret Line="289" TopLine="261"/>
+        <Caret Line="293" TopLine="276"/>
       </Position5>
       <Position6>
         <Filename Value="main.pas"/>
-        <Caret Line="290" TopLine="262"/>
+        <Caret Line="294" TopLine="276"/>
       </Position6>
       <Position7>
         <Filename Value="main.pas"/>
-        <Caret Line="293" TopLine="265"/>
+        <Caret Line="295" TopLine="276"/>
       </Position7>
       <Position8>
         <Filename Value="main.pas"/>
-        <Caret Line="294" TopLine="266"/>
+        <Caret Line="297" TopLine="276"/>
       </Position8>
       <Position9>
         <Filename Value="main.pas"/>
-        <Caret Line="295" TopLine="267"/>
+        <Caret Line="301" TopLine="276"/>
       </Position9>
       <Position10>
-        <Filename Value="cprocmem.pas"/>
-        <Caret Line="33" TopLine="16"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="311" Column="45" TopLine="297"/>
       </Position10>
       <Position11>
-        <Filename Value="cprocmem.pas"/>
-        <Caret Line="34" TopLine="16"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="293" TopLine="276"/>
       </Position11>
       <Position12>
-        <Filename Value="cprocmem.pas"/>
-        <Caret Line="35" TopLine="16"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="294" TopLine="276"/>
       </Position12>
       <Position13>
-        <Filename Value="cprocmem.pas"/>
-        <Caret Line="36" TopLine="16"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="295" TopLine="276"/>
       </Position13>
       <Position14>
         <Filename Value="main.pas"/>
-        <Caret Line="296" TopLine="268"/>
+        <Caret Line="297" TopLine="276"/>
       </Position14>
       <Position15>
         <Filename Value="main.pas"/>
-        <Caret Line="300" TopLine="281"/>
+        <Caret Line="301" TopLine="276"/>
       </Position15>
       <Position16>
         <Filename Value="main.pas"/>
-        <Caret Line="315" TopLine="298"/>
+        <Caret Line="314" TopLine="297"/>
       </Position16>
       <Position17>
-        <Filename Value="cprocmem.pas"/>
-        <Caret Line="37" Column="64" TopLine="16"/>
+        <Filename Value="main.pas"/>
+        <Caret Line="293" TopLine="276"/>
       </Position17>
       <Position18>
         <Filename Value="main.pas"/>
-        <Caret Line="262" TopLine="244"/>
+        <Caret Line="297" TopLine="276"/>
       </Position18>
       <Position19>
         <Filename Value="main.pas"/>
-        <Caret Line="272" TopLine="244"/>
+        <Caret Line="301" TopLine="276"/>
       </Position19>
       <Position20>
         <Filename Value="main.pas"/>
-        <Caret Line="262" TopLine="244"/>
+        <Caret Line="302" TopLine="276"/>
       </Position20>
       <Position21>
         <Filename Value="main.pas"/>
-        <Caret Line="276" TopLine="272"/>
+        <Caret Line="303" TopLine="276"/>
       </Position21>
       <Position22>
         <Filename Value="main.pas"/>
-        <Caret Line="262" TopLine="244"/>
+        <Caret Line="314" TopLine="297"/>
       </Position22>
       <Position23>
         <Filename Value="main.pas"/>
-        <Caret Line="272" TopLine="244"/>
+        <Caret Line="293" TopLine="276"/>
       </Position23>
       <Position24>
         <Filename Value="main.pas"/>
-        <Caret Line="262" TopLine="244"/>
+        <Caret Line="294" TopLine="276"/>
       </Position24>
+      <Position25>
+        <Filename Value="main.pas"/>
+        <Caret Line="295" TopLine="276"/>
+      </Position25>
+      <Position26>
+        <Filename Value="main.pas"/>
+        <Caret Line="297" TopLine="276"/>
+      </Position26>
+      <Position27>
+        <Filename Value="main.pas"/>
+        <Caret Line="301" TopLine="276"/>
+      </Position27>
     </JumpHistory>
     <RunParams>
       <FormatVersion Value="2"/>
@@ -252,6 +336,15 @@
     </RunParams>
   </ProjectSession>
   <Debugging>
+    <BreakPoints>
+      <Item>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="main.pas"/>
+        <Line Value="293"/>
+      </Item>
+    </BreakPoints>
     <Watches>
       <Item>
         <Expression Value="GameListCount"/>

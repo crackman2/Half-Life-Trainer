@@ -89,7 +89,7 @@ uses
   StdCtrls, ExtCtrls, Windows, LCLIntf, Menus, strutils,
 
   { custom }
-  CProcMem;
+  CProcMem, CgameHL, CgameOP, CgameBS;
 
 type
 
@@ -199,9 +199,15 @@ var
   CurrentGame: ansistring;
   //Identifies game, 'h' for Half-Life, 'o' for opposing force, 'b' for blueshift
   IsInGame: boolean = False;
-  g_ProcMem:TProcMem;
+  g_ProcMem: TProcMem;
+  g_gameHL: TgameHL;
+  g_gameOP: TgameOP;
+  g_gameBS: TgameBS;
 
-
+const
+  str_gameHL_error: string = 'g_gameHL not assigned!';
+  str_gameOP_error: string = 'g_gameOP not assigned!';
+  str_gameBS_error: string = 'g_gameBS not assigned!';
 
 
 implementation
@@ -223,14 +229,14 @@ end;
 
 
 
-
+{ ------------------------------ InitAddresses ----------------------------- }
+{ -> some addressed are the same for all games. this is where they are found }
+{ -> we also get module base addresses here                                  }
 procedure InitAddresses();
 begin
-  /// PATCH: "hw.dll"+007F6304  {   1E0 }
   dwHWBase := DWORD(g_ProcMem.GetModuleBaseAddress(dwProcessId, 'hw.dll'));
   dwCLIENTBase := DWORD(g_ProcMem.GetModuleBaseAddress(dwProcessId, 'client.dll'));
   dwSDLBase := DWORD(g_ProcMem.GetModuleBaseAddress(dwProcessId, 'SDL2.dll'));
-
 
   if (CurrentGame = 'h') or (CurrentGame = 'b') then
   begin
@@ -241,7 +247,10 @@ begin
     dwOPFORBase := DWORD(g_ProcMem.GetModuleBaseAddress(dwProcessId, 'opfor.dll'));
   end;
 
-  ReadProcessMemory(g_ProcMem.hProcess, Pointer(dwHWBase + $7F6304), @LocalPlayer.dwAddHP,
+  { ------------ LocalPlayer ------------ }
+  { -> some pointers to player values     }
+  ReadProcessMemory(g_ProcMem.hProcess, Pointer(dwHWBase + $7F6304),
+    @LocalPlayer.dwAddHP,
     sizeof(LocalPlayer.dwAddHP), nil);
   LocalPlayer.dwJValue := LocalPlayer.dwAddHP + $A8;
   LocalPlayer.dwAddHP := LocalPlayer.dwAddHP + $1E0; //X
@@ -251,16 +260,26 @@ end;
 
 { TForm1 }
 
+
+{ ------------------------------- FormCreate ------------------------------- }
+{ -> used for initialization/reinitialization                                }
+{ -> resetting controls, freeing objects, finding the game, creating objects }
+{    etc.                                                                    }
 procedure TForm1.FormCreate(Sender: TObject);// ENTRYYYYYYYYY
 var
   GameFound: boolean = False;
   GameList: array[0..2] of ansistring = ('Half-Life', 'Opposing Force', 'Blue Shift');
   GameListCount: integer = 2;
   GameListLength: integer = 0;
-  hProcessNonZero:Boolean=False;
-
+  hProcessNonZero: boolean = False;
 begin
-  //Initialization
+  if ReIniter then
+  begin
+    Log('--- Reinitializing ---');
+  end;
+
+
+  { ---------------------------- Reset Trackbars --------------------------- }
   LabelMaxHP.Caption := IntToStr(TrackBarMaxHP.Position - 1);
   LabelMaxAP.Caption := IntToStr(TrackBarMaxAP.Position - 1);
   LabelHPRate.Caption := floatToStr(TrackBarHPRate.Position / 10) + '%';
@@ -268,12 +287,32 @@ begin
   LocalPlayer.fHPRate := TrackBarHPRate.Position / 1000;
   LocalPlayer.fAPRate := TrackBarAPRate.Position / 1000;
 
-  //ShowMessage('GameList Length: ' + IntToStr(Length(GameList)));
+
+
+  { ----------------------------- Free Objects ----------------------------- }
+  if Assigned(g_gameHL) then begin
+    g_gameHL.Free;
+    g_gameHL:=nil;
+  end;
+  if Assigned(g_gameOP) then begin
+    g_gameOP.Free;
+    g_gameOP:=nil;
+  end;
+  if Assigned(g_gameBS) then begin
+    g_gameBS.Free;
+    g_gameBS:=nil;
+  end;
+
+
+
+  { ----------------------------- Waiting Loop ----------------------------- }
+  { -> waits for a window title, listed in GameList, to show up              }
+  { -> the first time, the user is informed that the Half-Life Trainer is    }
+  {    waiting for the a listed game to s   tart                                }
+  { -> when a game is found, g_ProcMem is created, where all the reading and }
+  {    writing to memory and injection happens                               }
   GameListLength := Length(GameList) - 1;
-  //Fenster Handle , ProcessId, OpenProcess-Handle..
   TimerGameStatus.Enabled := False;
-
-
 
   while not hProcessNonZero do
   begin
@@ -282,75 +321,70 @@ begin
     else
       Inc(GameListCount);
 
-    //ShowMessage('Win:'  + GameList[GameListCount]);
     hFenster := 0;
-    dwProcessId:=0;
+    dwProcessId := 0;
     hFenster := FindWindow(nil, PChar(GameList[GameListCount]));
     GetWindowThreadProcessId(hFenster, @dwProcessId);
 
 
-    if dwProcessId <> 0 then begin
-       if Assigned(g_ProcMem) then g_ProcMem.Free;
-       g_ProcMem:=TProcMem.Create(dwProcessId);
-       if g_ProcMem.hProcess <> 0 then hProcessNonZero:=True;
+    if dwProcessId <> 0 then
+    begin
+      if Assigned(g_ProcMem) then g_ProcMem.Free;
+      g_ProcMem := TProcMem.Create(dwProcessId);
+      if g_ProcMem.hProcess <> 0 then hProcessNonZero := True;
     end;
-    //ShowMessage('g_ProcMem.hProcess is: '  + IntToHex(g_ProcMem.hProcess,8));
 
+    { --------------- Waiting for game --------------- }
+    { -> is shown when Half-Life Trainer is launched   }
+    {    before one of the games                       }
     if not Assigned(g_ProcMem) and (GameFound = False) and
       (GameListCount >= GameListLength) then
     begin
-
       Form1.LabelStatus.Caption :=
         'Status: Game not found. Start Half-life or Opposing Force or Blue Shift!';
       Form1.LabelStatus.Font.Color := $0000DD;
       ShowMessage('Waiting for game...' + LineEnding +
         'Click "OK" and start Half-Life or Opposing Force or Blue Shift' +
-        LineEnding +
-        'Half-Life Trainer will keep running and waiting for a game');
-      //ShowMessage('GameList Length is: ' + IntToStr(GameListLength) + ' GameListCount was: ' + IntToStr(GameListCount));
+        LineEnding + 'Half-Life Trainer will keep running and waiting for a game');
       GameFound := True;
     end;
 
     Sleep(100);
   end;
-  //ShowMessage('ProcID: ' + IntToStr(dwProcessId) + LineEnding + 'Process Handle: ' + IntToHex(hProcess,8));
+
+  if not Assigned(g_ProcMem) then
+    ShowMessage('somehow g_ProcMem is not assigned after all....');
 
   TimerGameStatus.Enabled := True;
 
+  InitAddresses();
 
+  { ------------------------------ CurrentGame ----------------------------- }
+  { -> a letter is used to identify the game for other parts of the code.    }
+  {    this is simply done to keep things intelligible                       }
   if GameListCount = 0 then
   begin
-    //set current game to either hl or opfor
     CurrentGame := 'h';
-    //ShowMessage('Half-Life found!');
     Log('Half-Life found!');
+    g_gameHL := TgameHL.Create(g_ProcMem, @dwHLBase);
     Form1.LabelStatus.Caption := 'Status: Game found! Half-Life';
   end
   else if GameListCount = 1 then
   begin
     CurrentGame := 'o';
-    //ShowMessage('Opposing Force found!');
     Log('Opposing Force found!');
+    g_gameOP := TgameOP.Create(g_ProcMem, @dwOPFORBase);
     Form1.LabelStatus.Caption := 'Status: Game found! Opposing Force';
   end
   else if GameListCount = 2 then
   begin
     CurrentGame := 'b';
-    //ShowMessage('Blue Shift found!');
     Log('Blue Shift found!');
+    g_gameBS := TgameBS.Create(g_ProcMem, @dwHLBase);
     Form1.LabelStatus.Caption := 'Status: Game found! Blue Shift';
   end;
 
   Form1.LabelStatus.Font.Color := $00DD00;
-
-  //===HP and AP Addresses===
-  InitAddresses();
-
-  if ReIniter then
-  begin
-    //ShowMessage('Done.');
-    Log('Reinitialize done.');
-  end;
 
 end;
 
@@ -375,8 +409,7 @@ begin
     if FileExists(GetCurrentDir + '\\HLpMod.dll') then
     begin
       if g_ProcMem.InjectDll(GetCurrentDir + '\\HLpMod.dll') then
-      begin   //Injects HLpMod.dll specifically
-        //ShowMessage('Injection successful!');
+      begin
         Log('Injection successful!');
         TimerBhop.Enabled := False;
         CheckBoxAutoBhop.Checked := False;
@@ -406,13 +439,15 @@ end;
 {    player in the air when appropriate                                      }
 procedure TForm1.TimerBhopTimer(Sender: TObject);
 begin
-  if Assigned(g_ProcMem) then begin
+  if Assigned(g_ProcMem) then
+  begin
     KeyStr := PChar(IntToBin(g_ProcMem.ReadByte(dwHWBase + $9CF548), 8));
 
     LocalPlayer.bOnGround := g_ProcMem.ReadByte(LocalPlayer.dwOnGround);
     LocalPlayer.fJValue := g_ProcMem.ReadFloat(LocalPlayer.dwJValue);
 
-    if (KeyStr[6] = '1') and (LocalPlayer.fJValue <= 0) and (LocalPlayer.bOnGround = 1) then
+    if (KeyStr[6] = '1') and (LocalPlayer.fJValue <= 0) and
+      (LocalPlayer.bOnGround = 1) then
     begin
       g_ProcMem.WriteFloat(237.0, LocalPlayer.dwJValue);
     end;
@@ -440,8 +475,8 @@ begin
 
   if (FindWindow(nil, WinTitle) = 0) or (HWCheck = Pointer(1)) then
   begin
-    Form1.LabelStatus.Caption := 'Status: Game not running!' +
-      LineEnding + 'Click ''Reinitialize''';
+    Form1.LabelStatus.Caption :=
+      'Status: Game not running!' + LineEnding + 'Click ''Reinitialize''';
     Form1.LabelStatus.Font.Color := $0000DD;
   end
   else
@@ -493,198 +528,59 @@ end;
 { -------------------------- CheckBoxInfAmmoChange ------------------------- }
 { -> there is nothing but pain to be found here, turn back                   }
 procedure TForm1.CheckBoxInfAmmoChange(Sender: TObject);
+var
+  bFailedFunction: boolean = False;
+  bFailedObject: boolean = False;
 begin
-  if CheckBoxInfAmmo.Checked then
+  //NOPping dec opcode (or sub for the egon)
+  if CurrentGame = 'h' then
   begin
-    //NOPping dec opcode (or sub for the egon)
-    if CurrentGame = 'h' then
+    if Assigned(g_gameHL) then
     begin
-      g_ProcMem.WriteByte($90, dwHLBase + $6D5F3); //357 X  FIXED
-      g_ProcMem.WriteByte($90, dwHLBase + $3A616); //Pistol X
-      g_ProcMem.WriteByte($90, dwHLBase + $4B990); //SMG X
-      g_ProcMem.WriteByte($90, dwHLBase + $76297); //Shotgun X FIXED 764DA
-      g_ProcMem.WriteByte($90, dwHLBase + $764DA); //Shotgun Doppelschuss  FIXED
-      g_ProcMem.WriteByte($90, dwHLBase + $764DA + 1); //Shotgun Doppelschuss
-      g_ProcMem.WriteByte($90, dwHLBase + $764DA + 2); //Shotgun Doppelschuss
-      g_ProcMem.WriteByte($90, dwHLBase + $1DF4A); //Crossbow X
-      g_ProcMem.WriteByte($90, dwHLBase + $6F77A); //Rockets X
-      g_ProcMem.WriteByte($90, dwHLBase + $25DDA); //Egon 1 X
-      g_ProcMem.WriteByte($90, dwHLBase + $25DDB); //Egon 2 X
-      // hl.dll+3C59C - 49                    - dec ecx //Hornet gun rechtsklick
-      g_ProcMem.WriteByte($90, dwHLBase + $3BD33); //Hornet 2 X
-      g_ProcMem.WriteByte($90, dwHLBase + $3C63C); //Hornet rechtsklick
-      g_ProcMem.WriteByte($90, dwHLBase + $352C7); //Nades   X
-      g_ProcMem.WriteByte($90, dwHLBase + $705DF); //Satchel X
-      g_ProcMem.WriteByte($90, dwHLBase + $863A1); //Mines X
-      g_ProcMem.WriteByte($90, dwHLBase + $7C022); //Snarks X
-      g_ProcMem.WriteByte($90, dwHLBase + $4BBE2); //SMG Launcher
-      g_ProcMem.WriteByte($90, dwHLBase + $2FFE1); //Gauss
-      g_ProcMem.WriteByte($90, dwHLBase + $2FFE2); //Gauss
-      g_ProcMem.WriteByte($90, dwHLBase + $2FFE3); //Gauss
-      g_ProcMem.WriteByte($90, dwHLBase + $30115); //Gauss
-      g_ProcMem.WriteByte($90, dwHLBase + $30264); //Gauss Right Click
-      //WriteByte($90, dwHLBase + $301B4); //Gauss
+      if not g_gameHL.EnableInfiniteAmmo(CheckBoxInfAmmo.Checked) then
+        bFailedFunction := True;
     end
-    else if CurrentGame = 'o' then
-    begin
-      //Opfor code goes here (ACTIVATE)
-      g_ProcMem.WriteByte($90, dwOPFORBase + $5A177); //Pistol 9mm
-      g_ProcMem.WriteByte($90, dwOPFORBase + $B2234); //357 Magnum
-      g_ProcMem.WriteByte($90, dwOPFORBase + $2D875); //Eagle
-      g_ProcMem.WriteByte($90, dwOPFORBase + $73548); //SMG
-      g_ProcMem.WriteByte($90, dwOPFORBase + $737D3); //SMG Grenade
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C407B); //Shotgun Primary
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C42FF); //Shotgun Secondary
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C42FF + 1);
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C42FF + 2);
-      g_ProcMem.WriteByte($90, dwOPFORBase + $247A0); //Crossbow
-      g_ProcMem.WriteByte($90, dwOPFORBase + $B9338); //RPG
-      g_ProcMem.WriteByte($90, dwOPFORBase + $40E7A); //Gauss Primary
-      g_ProcMem.WriteByte($90, dwOPFORBase + $40E7A + 1);
-      g_ProcMem.WriteByte($90, dwOPFORBase + $40E7A + 2);
-      g_ProcMem.WriteByte($90, dwOPFORBase + $40FED); //Gauss Secondary A
-      g_ProcMem.WriteByte($90, dwOPFORBase + $4117B); //Gauss Secondary B
-      g_ProcMem.WriteByte($90, dwOPFORBase + $32CDA); //Egon
-      g_ProcMem.WriteByte($90, dwOPFORBase + $32CDA + 1);
-      g_ProcMem.WriteByte($90, dwOPFORBase + $5B95F); //Hornet Primary
-      g_ProcMem.WriteByte($90, dwOPFORBase + $5C2E8); //Hornet Secondary
-      g_ProcMem.WriteByte($90, dwOPFORBase + $4E185); //Grenade
-      g_ProcMem.WriteByte($90, dwOPFORBase + $BA2AA); //Satchel
-      g_ProcMem.WriteByte($90, dwOPFORBase + $DB1FC); //Mine
-      g_ProcMem.WriteByte($90, dwOPFORBase + $CD3A2); //Snark
-      g_ProcMem.WriteByte($90, dwOPFORBase + $65356); //M249
-      g_ProcMem.WriteByte($90, dwOPFORBase + $299C9); //Displacer
-      g_ProcMem.WriteByte($90, dwOPFORBase + $299C9 + 1);
-      g_ProcMem.WriteByte($90, dwOPFORBase + $299C9 + 2);
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C525C); //Sniper
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C8F77); //Spore Launcher Primary
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C9208); //Spore Launcher Secondary
-      g_ProcMem.WriteByte($90, dwOPFORBase + $C02E1); //Shock Roach
-    end
-    else if CurrentGame = 'b' then
-    begin
-      //Blue Shit code goes here (ACTIVATE)
-      g_ProcMem.WriteByte($90, dwHLBase + $3A425);//Pistol 9mm
-      g_ProcMem.WriteByte($90, dwHLBase + $6D6C3);//357 Magnum
-      g_ProcMem.WriteByte($90, dwHLBase + $4BB80);//SMG
-      g_ProcMem.WriteByte($90, dwHLBase + $4BDD2);//SMG Grenade
-      g_ProcMem.WriteByte($90, dwHLBase + $775A6);//Shotgun Primary
-      g_ProcMem.WriteByte($90, dwHLBase + $777E9);//Shotgun Secondary
-      g_ProcMem.WriteByte($90, dwHLBase + $777E9 + 1);
-      g_ProcMem.WriteByte($90, dwHLBase + $777E9 + 2);
-      g_ProcMem.WriteByte($90, dwHLBase + $1DB8A);//Crossbow
-      g_ProcMem.WriteByte($90, dwHLBase + $70A8A);//RPG
-      g_ProcMem.WriteByte($90, dwHLBase + $2FB80);//Gauss Primary
-      g_ProcMem.WriteByte($90, dwHLBase + $2FB80 + 1);
-      g_ProcMem.WriteByte($90, dwHLBase + $2FB80 + 2);
-      g_ProcMem.WriteByte($90, dwHLBase + $2FCB4);//Gauss Secondary A
-      g_ProcMem.WriteByte($90, dwHLBase + $2FE03);//Gauss Secondary B
-      g_ProcMem.WriteByte($90, dwHLBase + $2597A);//Egon
-      g_ProcMem.WriteByte($90, dwHLBase + $2597A + 1);
-      g_ProcMem.WriteByte($90, dwHLBase + $3BB43);//Hornet Primary
-      g_ProcMem.WriteByte($90, dwHLBase + $3C44C);//Hornet Secondary
-      g_ProcMem.WriteByte($90, dwHLBase + $350D6);//Grenade
-      g_ProcMem.WriteByte($90, dwHLBase + $718E8);//Satchel
-      g_ProcMem.WriteByte($90, dwHLBase + $718E8 + 1);
-      g_ProcMem.WriteByte($90, dwHLBase + $87871);//Mine
-      g_ProcMem.WriteByte($90, dwHLBase + $7D31E);//Snark
-    end;
-
+    else
+      bFailedObject := True;
   end
-  else
+  else if CurrentGame = 'o' then
   begin
-    if CurrentGame = 'h' then
+    if Assigned(g_gameOP) then
     begin
-      g_ProcMem.WriteByte($4A, dwHLBase + $6D5F3); //357 X
-      g_ProcMem.WriteByte($48, dwHLBase + $3A616); //Pistol X
-      g_ProcMem.WriteByte($4A, dwHLBase + $4B990); //SMG  X
-      g_ProcMem.WriteByte($4A, dwHLBase + $76297); //Shotgun X
-      g_ProcMem.WriteByte($83, dwHLBase + $764DA); //Shotgun Doppelschuss  83 C2 FE
-      g_ProcMem.WriteByte($C2, dwHLBase + $764DA + 1); //Shotgun Doppelschuss
-      g_ProcMem.WriteByte($FE, dwHLBase + $764DA + 2); //Shotgun Doppelschuss
-      g_ProcMem.WriteByte($48, dwHLBase + $1DF4A); //Crossbow X
-      g_ProcMem.WriteByte($49, dwHLBase + $6F77A); //Rockets X
-      g_ProcMem.WriteByte($2B, dwHLBase + $25DDA); //Egon 1 X
-      g_ProcMem.WriteByte($C2, dwHLBase + $25DDB); //Egon 2 X
-      g_ProcMem.WriteByte($4F, dwHLBase + $3BD33); //Hornet 2 X
-      g_ProcMem.WriteByte($49, dwHLBase + $3C63C);  //Hornet Rightclick
-      g_ProcMem.WriteByte($4F, dwHLBase + $352C7); //Nades X
-      g_ProcMem.WriteByte($49, dwHLBase + $705DF); //Satchel X
-      g_ProcMem.WriteByte($49, dwHLBase + $863A1); //Mines X
-      g_ProcMem.WriteByte($49, dwHLBase + $7C022); //Snarks X
-      g_ProcMem.WriteByte($4F, dwHLBase + $4BBE2); //SMG Launcher X
-      g_ProcMem.WriteByte($83, dwHLBase + $2FFE1); //Gauss X
-      g_ProcMem.WriteByte($C1, dwHLBase + $2FFE2); //Gauss X
-      g_ProcMem.WriteByte($FE, dwHLBase + $2FFE3); //Gauss X
-      g_ProcMem.WriteByte($49, dwHLBase + $30115); //Gauss X
-      g_ProcMem.WriteByte($49, dwHLBase + $30264); //Gauss Right click
-      //WriteByte($49, dwHLBase + $301B4); //Gauss
+      if not g_gameOP.EnableInfiniteAmmo(CheckBoxInfAmmo.Checked) then
+        bFailedFunction := True;
     end
-    else if CurrentGame = 'o' then
+    else
+      bFailedObject := True;
+  end
+  else if CurrentGame = 'b' then
+  begin
+    if Assigned(g_gameBS) then
     begin
-      //Opfor code goes here (DEACTIVATE)
-      g_ProcMem.WriteByte($48, dwOPFORBase + $5A177); //Pistol 9mm
-      g_ProcMem.WriteByte($48, dwOPFORBase + $B2234); //357 Magnum
-      g_ProcMem.WriteByte($4F, dwOPFORBase + $2D875); //Eagle
-      g_ProcMem.WriteByte($4A, dwOPFORBase + $73548); //SMG
-      g_ProcMem.WriteByte($49, dwOPFORBase + $737D3); //SMG Grenade
-      g_ProcMem.WriteByte($48, dwOPFORBase + $C407B); //Shotgun Primary
-      g_ProcMem.WriteByte($83, dwOPFORBase + $C42FF); //Shotgun Secondary
-      g_ProcMem.WriteByte($C0, dwOPFORBase + $C42FF + 1);
-      g_ProcMem.WriteByte($FE, dwOPFORBase + $C42FF + 2);
-      g_ProcMem.WriteByte($48, dwOPFORBase + $247A0); //Crossbow
-      g_ProcMem.WriteByte($48, dwOPFORBase + $B9338); //RPG
-      g_ProcMem.WriteByte($83, dwOPFORBase + $40E7A); //Gauss Primary
-      g_ProcMem.WriteByte($C1, dwOPFORBase + $40E7A + 1);
-      g_ProcMem.WriteByte($FE, dwOPFORBase + $40E7A + 2);
-      g_ProcMem.WriteByte($49, dwOPFORBase + $40FED); //Gauss Secondary A
-      g_ProcMem.WriteByte($49, dwOPFORBase + $4117B); //Gauss Secondary B
-      g_ProcMem.WriteByte($2B, dwOPFORBase + $32CDA); //Egon
-      g_ProcMem.WriteByte($C2, dwOPFORBase + $32CDA + 1);
-      g_ProcMem.WriteByte($49, dwOPFORBase + $5B95F); //Hornet Primary
-      g_ProcMem.WriteByte($49, dwOPFORBase + $5C2E8); //Hornet Secondary
-      g_ProcMem.WriteByte($4A, dwOPFORBase + $4E185); //Grenade
-      g_ProcMem.WriteByte($49, dwOPFORBase + $BA2AA); //Satchel
-      g_ProcMem.WriteByte($49, dwOPFORBase + $DB1FC); //Mine
-      g_ProcMem.WriteByte($49, dwOPFORBase + $CD3A2); //Snark
-      g_ProcMem.WriteByte($4A, dwOPFORBase + $65356); //M249
-      g_ProcMem.WriteByte($83, dwOPFORBase + $299C9); //Displacer
-      g_ProcMem.WriteByte($C1, dwOPFORBase + $299C9 + 1);
-      g_ProcMem.WriteByte($EC, dwOPFORBase + $299C9 + 2);
-      g_ProcMem.WriteByte($4B, dwOPFORBase + $C525C); //Sniper
-      g_ProcMem.WriteByte($48, dwOPFORBase + $C8F77); //Spore Launcher Primary
-      g_ProcMem.WriteByte($48, dwOPFORBase + $C9208); //Spore Launcher Secondary
-      g_ProcMem.WriteByte($49, dwOPFORBase + $C02E1); //Shock Roach
+      if not g_gameBS.EnableInfiniteAmmo(CheckBoxInfAmmo.Checked) then
+        bFailedFunction := True;
+    end
+    else
+      bFailedObject := True;
+  end;
 
-    end
-    else if CurrentGame = 'b' then
+  if bFailedObject or bFailedFunction then
+  begin
+    if CheckBoxInfAmmo.Checked then
+    Log('Can''t InfAmmo in main menu');
+
+    CheckBoxInfAmmo.Checked:=False;
+    {
+    if bFailedObject then
     begin
-      //to do (deactivate)
-      g_ProcMem.WriteByte($48, dwHLBase + $3A425);//Pistol 9mm
-      g_ProcMem.WriteByte($4A, dwHLBase + $6D6C3);//357 Magnum
-      g_ProcMem.WriteByte($4A, dwHLBase + $4BB80);//SMG
-      g_ProcMem.WriteByte($4F, dwHLBase + $4BDD2);//SMG Grenade
-      g_ProcMem.WriteByte($4A, dwHLBase + $775A6);//Shotgun Primary
-      g_ProcMem.WriteByte($83, dwHLBase + $777E9);//Shotgun Secondary
-      g_ProcMem.WriteByte($C2, dwHLBase + $777E9 + 1);
-      g_ProcMem.WriteByte($FE, dwHLBase + $777E9 + 2);
-      g_ProcMem.WriteByte($48, dwHLBase + $1DB8A);//Crossbow
-      g_ProcMem.WriteByte($48, dwHLBase + $70A8A);//RPG
-      g_ProcMem.WriteByte($83, dwHLBase + $2FB80);//Gauss Primary
-      g_ProcMem.WriteByte($C1, dwHLBase + $2FB80 + 1);
-      g_ProcMem.WriteByte($FE, dwHLBase + $2FB80 + 2);
-      g_ProcMem.WriteByte($49, dwHLBase + $2FCB4);//Gauss Secondary A
-      g_ProcMem.WriteByte($49, dwHLBase + $2FE03);//Gauss Secondary B
-      g_ProcMem.WriteByte($2B, dwHLBase + $2597A);//Egon
-      g_ProcMem.WriteByte($C2, dwHLBase + $2597A + 1);
-      g_ProcMem.WriteByte($4A, dwHLBase + $3BB43);//Hornet Primary
-      g_ProcMem.WriteByte($49, dwHLBase + $3C44C);//Hornet Secondary
-      g_ProcMem.WriteByte($4F, dwHLBase + $350D6);//Grenade
-      g_ProcMem.WriteByte($FF, dwHLBase + $718E8);//Satchel
-      g_ProcMem.WriteByte($08, dwHLBase + $718E8 + 1);
-      g_ProcMem.WriteByte($49, dwHLBase + $87871);//Mine
-      g_ProcMem.WriteByte($49, dwHLBase + $7D31E);//Snark
+      Log('Obj:' + CurrentGame + ' missing');
     end;
+
+    if bFailedFunction then
+    begin
+      Log('Func:' + CurrentGame + ' failed');
+    end;
+    }
   end;
 end;
 
@@ -771,66 +667,60 @@ end;
 { -> is triggered when the checkbox is clicked, assembly code is disabled    }
 {    according to state and according to the CurrentGame flag                }
 procedure TForm1.CheckBoxProperRapidfireChange(Sender: TObject);
+var
+  bFailedFunction: boolean = False;
+  bFailedObject: boolean = False;
 begin
-  if (CheckBoxProperRapidfire.Checked) then
-  begin
     if CurrentGame = 'h' then
     begin
-      //Rapid fire all guns
-      g_ProcMem.WriteByte($90, dwHLBase + $63318);   //Primary Fire
-      g_ProcMem.WriteByte($90, dwHLBase + $63319);
-
-      g_ProcMem.WriteByte($90, dwHLBase + $63344);   //Secondary Fire
-      g_ProcMem.WriteByte($90, dwHLBase + $63345);
-    end                                                    //LocalPlayer
-    else if CurrentGame = 'o' then
-    begin
-      //Opfor code goes here
-      g_ProcMem.WriteByte($90, dwOPFORBase + $A67F6);//Primary Fire
-      g_ProcMem.WriteByte($90, dwOPFORBase + $A67F6 + 1);
-
-      g_ProcMem.WriteByte($90, dwOPFORBase + $A6822);//Secondary Fire
-      g_ProcMem.WriteByte($90, dwOPFORBase + $A6822 + 1);
-    end
-    else if CurrentGame = 'b' then
-    begin
-      //Blue Shift
-      g_ProcMem.WriteByte($90, dwHLBase + $63488);   //Primary Fire
-      g_ProcMem.WriteByte($90, dwHLBase + $63489);
-
-      g_ProcMem.WriteByte($90, dwHLBase + $634B4);   //Secondary Fire
-      g_ProcMem.WriteByte($90, dwHLBase + $634B5);
-    end;
-  end
-  else
-  begin
-    if CurrentGame = 'h' then
-    begin
-      g_ProcMem.WriteByte($74, dwHLBase + $63318);   //Primary Fire
-      g_ProcMem.WriteByte($08, dwHLBase + $63319);
-
-      g_ProcMem.WriteByte($74, dwHLBase + $63344);   //Secondary Fire
-      g_ProcMem.WriteByte($08, dwHLBase + $63345);
-
+      if Assigned(g_gameHL) then
+      begin
+        if not g_gameHL.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
+          bFailedFunction := True;
+      end
+      else
+        bFailedObject := True;
     end
     else if CurrentGame = 'o' then
     begin
-      //Opfor code goes here
-      g_ProcMem.WriteByte($74, dwOPFORBase + $A67F6);//Primary Fire
-      g_ProcMem.WriteByte($08, dwOPFORBase + $A67F6 + 1);
-
-      g_ProcMem.WriteByte($74, dwOPFORBase + $A6822);//Secondary Fire
-      g_ProcMem.WriteByte($08, dwOPFORBase + $A6822 + 1);
+      if Assigned(g_gameOP) then
+      begin
+        if not g_gameOP.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
+          bFailedFunction := True;
+      end
+      else
+        bFailedObject := True;
     end
     else if CurrentGame = 'b' then
     begin
-      //Blue Shift
-      g_ProcMem.WriteByte($74, dwHLBase + $63488);   //Primary Fire
-      g_ProcMem.WriteByte($08, dwHLBase + $63489);
-
-      g_ProcMem.WriteByte($74, dwHLBase + $634B4);   //Secondary Fire
-      g_ProcMem.WriteByte($08, dwHLBase + $634B5);
+      if Assigned(g_gameBS) then
+      begin
+        if not g_gameBS.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
+          bFailedFunction := True;
+      end
+      else
+        bFailedObject := True;
     end;
+
+  if bFailedObject or bFailedFunction then
+  begin
+    if CheckBoxProperRapidfire.Checked then
+    Log('Can''t RapidFire in main menu');
+
+
+    CheckBoxProperRapidfire.Checked := False;
+
+    {
+    if bFailedObject then
+    begin
+      Log('Obj:' + CurrentGame + ' missing');
+    end;
+
+    if bFailedFunction then
+    begin
+      Log('Func:' + CurrentGame + ' failed');
+    end;
+    }
   end;
 
 end;
@@ -864,7 +754,6 @@ begin
     begin
       CheckBoxAutoBhop.Checked := False;
       CheckBoxAutoBhop.Enabled := False;
-      //ShowMessage('Error: Can''t enable AutoBhop' + sLineBreak +  '          HLpMod has its own AutoBhop');
       Log('HLpMod''s Bhop preferred');
     end;
   end
@@ -878,46 +767,35 @@ end;
 {    messagebox, but it is a pain to change.                                 }
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin
-  ShowMessage('Half-Life Trainer v1.3.5' + sLineBreak +
-    'by pombenenge (on YouTube)' + sLineBreak +
-    'Last Updated: 2023-08-18' + sLineBreak +
-    sLineBreak +
-    'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo, AutoBhop'
-    +
-    sLineBreak + sLineBreak +
-    'WARNING: The trainer may cause crashes. Save often.' +
+  ShowMessage('Half-Life Trainer v1.4' + sLineBreak + 'by pombenenge (on YouTube)' +
+    sLineBreak + 'Last Updated: 2023-08-19' + sLineBreak + sLineBreak +
+    'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo, AutoBhop' +
+    sLineBreak + sLineBreak + 'WARNING: The trainer may cause crashes. Save often.' +
     sLineBreak + sLineBreak + '-- How to use --' + sLineBreak +
     '1. Start Half-life, Opposing Force or Blue Shift (Tested on Steam version, other versions probably don''t work)'
-    +
-    sLineBreak +
+    + sLineBreak +
     '2. Start the trainer (If the trainer is already running, click on "Reinitialize")' +
-    sLineBreak + '3. Adjust trainer settings to your liking.'
-    + sLineBreak + sLineBreak + '-- FAQ --' +
-    sLineBreak + 'Q: Does it work in multiplayer?' +
-    sLineBreak +
+    sLineBreak + '3. Adjust trainer settings to your liking.' +
+    sLineBreak + sLineBreak + '-- FAQ --' + sLineBreak +
+    'Q: Does it work in multiplayer?' + sLineBreak +
     'A: No. If you try you will get VAC banned. Seriously, do NOT do it.' +
-    sLineBreak + sLineBreak + 'Q: Nothing happens? Why?' +
-    sLineBreak + 'A: There can be multiple reasons why it does not work.' +
-    sLineBreak +
+    sLineBreak + sLineBreak + 'Q: Nothing happens? Why?' + sLineBreak +
+    'A: There can be multiple reasons why it does not work.' + sLineBreak +
     '   1. You probably need the Steam version of Half-Life. (Cracked or WON version do not work)'
     + sLineBreak + '   2. Run the trainer as administrator.' +
-    sLineBreak +
-    '   3. Check the instructions above and make sure you are doing it right.' +
-    sLineBreak +
+    sLineBreak + '   3. Check the instructions above and make sure you are doing it right.'
+    + sLineBreak +
     '   4. The trainer may be outdated. (If you have confirmed that everything else is not the cause'
-    + sLineBreak + '       contact me on YouTube)' +
-    sLineBreak + sLineBreak + 'Q: Why do I explode when I spam SMG grenades'
-    +
+    + sLineBreak + '       contact me on YouTube)' + sLineBreak +
+    sLineBreak + 'Q: Why do I explode when I spam SMG grenades' +
     sLineBreak +
     'A: When you are in the main menu type "fps_max 100" into the console. In-Game try walking backwards or'
+    + sLineBreak + '     moving your mouse left or right while shooting grenades.'
     +
-    sLineBreak + '     moving your mouse left or right while shooting grenades.'
-    + sLineBreak + '     The grenades must not collide in mid air!'
-    + sLineBreak + sLineBreak + 'Q: What is HLpMod.dll?' +
-    sLineBreak +
+    sLineBreak + '     The grenades must not collide in mid air!' +
+    sLineBreak + sLineBreak + 'Q: What is HLpMod.dll?' + sLineBreak +
     'A: HLpMod is an OpenGL overlay I made which provides some extra information. It is inteded mainly for bunnyhopping'
-    +
-    sLineBreak +
+    + sLineBreak +
     '     and includes it''s own frame perfect AutoBhop, which is always on,' +
     sLineBreak +
     '     and a speedometer (and max speed since last quickload) The source code is also on my GitHub'
@@ -926,8 +804,8 @@ begin
     sLineBreak + 'A: Buy the damn game! It''s like 10 bucks jfc..' +
     sLineBreak +
     '     If you''re too poor, here is your answer: Cracked versions are not supported.'
-    + sLineBreak + sLineBreak +
-    'Click on the icons for GitHub and YouTube links' +
+    +
+    sLineBreak + sLineBreak + 'Click on the icons for GitHub and YouTube links' +
     sLineBreak + sLineBreak + 'Have fun!'
     );
 end;
@@ -956,13 +834,15 @@ end;
 {    (which is controlled by the appropriate checkboxes)                     }
 procedure TForm1.TimerRegenTimer(Sender: TObject);
 begin
-  if Assigned(g_ProcMem) then begin
-    { ------------------------- Read Current HP & AP ------------------------- }
+  if Assigned(g_ProcMem) then
+  begin
+    { ------------------------ Read Current HP & AP ------------------------ }
     LocalPlayer.fHP := g_ProcMem.ReadFloat(LocalPlayer.dwAddHP);
     LocalPlayer.fAP := g_ProcMem.ReadFloat(LocalPlayer.dwAddAP);
 
-    { ----------------------------- Regenerate HP ---------------------------- }
-    if CheckBoxEnableHPRegen.Checked and (LocalPlayer.fHP <> StrToInt(EditMaxHP.Text)) then
+    { ---------------------------- Regenerate HP --------------------------- }
+    if CheckBoxEnableHPRegen.Checked and (LocalPlayer.fHP <>
+      StrToInt(EditMaxHP.Text)) then
       if ((LocalPlayer.fHP + (LocalPlayer.fHPRate)) <=
         single(TrackBarMaxHP.Position + 1)) then
       begin
@@ -977,8 +857,9 @@ begin
       end;
 
 
-    { ----------------------------- Regenerate AP ---------------------------- }
-    if CheckBoxEnableAPRegen.Checked and (LocalPlayer.fAP <> StrToInt(EditMaxAP.Text)) then
+    { ---------------------------- Regenerate AP --------------------------- }
+    if CheckBoxEnableAPRegen.Checked and (LocalPlayer.fAP <>
+      StrToInt(EditMaxAP.Text)) then
       if ((LocalPlayer.fAP + (LocalPlayer.fAPRate)) <=
         single(TrackBarMaxAP.Position + 1)) then
       begin
@@ -990,7 +871,7 @@ begin
       begin
         LocalPlayer.fAP := LocalPlayer.fAP - LocalPlayer.fAPRate;
         g_ProcMem.WriteFloat(LocalPlayer.fAP, LocalPlayer.dwAddAP);
-    end;
+      end;
   end;
 end;
 

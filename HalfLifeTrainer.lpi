@@ -40,7 +40,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="3">
+    <Units Count="6">
       <Unit0>
         <Filename Value="HalfLifeTrainer.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -58,6 +58,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="CProcMem"/>
       </Unit2>
+      <Unit3>
+        <Filename Value="cgamehl.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CgameHL"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="cgameop.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CgameOP"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="cgamebs.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="CgameBS"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -75,13 +90,10 @@
       <RelocatableUnit Value="True"/>
       <TargetCPU Value="i386"/>
       <Optimizations>
-        <OptimizationLevel Value="3"/>
+        <OptimizationLevel Value="0"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="False"/>
-      </Debugging>
       <LinkSmart Value="True"/>
       <Options>
         <Win32>
