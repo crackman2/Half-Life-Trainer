@@ -12,21 +12,78 @@ uses
   Classes, SysUtils, Dialogs, Windows,
 
   { custom }
-  CProcMem;
+  Cgame, CProcMem;
 type
-  TgameHL = class
-    constructor Create(g_ProcMem:TProcMem; dwHLBase:PDWORD);
+  TgameHL = class (Tgame)
+    {constructor Create(g_ProcMem:TProcMem; dwHLBase:PDWORD);
     function EnableInfiniteAmmo(State:Boolean): Boolean;
     function EnableRapidFire(State:Boolean): Boolean;
     public
       ProcMem:TProcMem;
       dwHLBase:PDWORD;
-    private
+    private}
+    protected
+    procedure InitializeOpCodes; override;
   end;
 
 
 implementation
 
+procedure TgameHL.InitializeOpCodes;
+var
+  FOpCodeInfAmmo: array[0..17] of array of LongWord =
+  (
+    ($6D5F3, $4A),                         //357
+    ($3A616, $48),                         //Pistol X
+    ($4B990, $4A),                         //SMG  X
+    ($76297, $4A),                         //Shotgun X
+    ($764DA, $83, $C2, $FE),               //Shotgun Doppelschuss  83 C2 FE
+    ($1DF4A, $48),                         //Crossbow X
+    ($6F77A, $49),                         //Rockets X
+    ($25DDA, $2B, $C2),                    //Egon 1 X
+    ($3BD33, $4F),                         //Hornet 2 X
+    ($3C63C, $49),                         //Hornet Rightclick
+    ($352C7, $4F),                         //Nades X
+    ($705DF, $49),                         //Satchel X
+    ($863A1, $49),                         //Mines X
+    ($7C022, $49),                         //Snarks X
+    ($4BBE2, $4F),                         //SMG Launcher X
+    ($2FFE1, $83,$C1,$FE),                 //Gauss X
+    ($30115, $49),                         //Gauss X
+    ($30264, $49)                          //Gauss Right click
+  );
+
+  FOpCodeRapidFire: array [0..1] of array of LongWord =
+  (
+    ($63318, $74, $08),                         //Primary Fire
+    ($63344, $74, $08)                          //Secondary Fire
+  );
+
+  j:Integer;
+  jj:integer;
+begin
+  SetLength(OpCodeInfAmmo,Length(FOpCodeInfAmmo));
+
+  for j:=0 to High(FOpCodeInfAmmo) do begin
+    SetLength(OpCodeInfAmmo[j],Length(FOpCodeInfAmmo[j]));
+    for jj:=0 to High(FOpCodeInfAmmo[j]) do begin
+      OpCodeInfAmmo[j,jj]:=FOpCodeInfAmmo[j,jj];
+    end;
+  end;
+
+  SetLength(OpCodeRapidFire,Length(FOpCodeRapidFire));
+
+  for j:=0 to High(FOpCodeRapidFire) do begin
+    SetLength(OpCodeRapidFire[j],Length(FOpCodeRapidFire[j]));
+    for jj:=0 to High(FOpCodeRapidFire[j]) do begin
+      OpCodeRapidFire[j,jj]:=FOpCodeRapidFire[j,jj];
+    end;
+  end;
+
+end;
+
+
+{
 constructor TgameHL.Create(g_ProcMem:TProcMem; dwHLBase:PDWORD);
 begin
   Self.dwHLBase:=dwHLBase;
@@ -119,6 +176,8 @@ begin
      Result:=True;
   end;
 end;
+
+}
 
 end.
 

@@ -12,9 +12,10 @@ uses
   Classes, SysUtils, Dialogs, Windows,
 
   { custom }
-  CProcMem;
+  Cgame, CProcMem;
 type
-  TgameOP = class
+  TgameOP = class (Tgame)
+    {
     constructor Create(g_ProcMem:TProcMem; dwOPFORBase:PDWORD);
     function EnableInfiniteAmmo(State:Boolean): Boolean;
     function EnableRapidFire(State:Boolean): Boolean;
@@ -22,11 +23,75 @@ type
       ProcMem:TProcMem;
       dwOPFORBase:PDWORD;
     private
+    }
+    procedure InitializeOpCodes; override;
   end;
 
 
 implementation
 
+procedure TgameOP.InitializeOpCodes;
+var
+  FOpCodeInfAmmo: array[0..24] of array of LongWord =
+  (
+    ($5A177, $48),                                 // Pistol 9mm
+    ($B2234, $48),                                 // 357 Magnum
+    ($2D875, $4F),                                 // Eagle
+    ($73548, $4A),                                 // SMG
+    ($737D3, $49),                                 // SMG Grenade
+    ($C407B, $48),                                 // Shotgun Primary
+    ($C42FF, $83, $C0, $FE),                       // Shotgun Secondary
+    ($247A0, $48),                                 // Crossbow
+    ($B9338, $48),                                 // RPG
+    ($40E7A, $83, $C1, $FE),                       // Gauss Primary
+    ($40FED, $49),                                 // Gauss Secondary A
+    ($4117B, $49),                                 // Gauss Secondary B
+    ($32CDA, $2B, $C2),                            // Egon
+    ($5B95F, $49),                                 // Hornet Primary
+    ($5C2E8, $49),                                 // Hornet Secondary
+    ($4E185, $4A),                                 // Grenade
+    ($BA2AA, $49),                                 // Satchel
+    ($DB1FC, $49),                                 // Mine
+    ($CD3A2, $49),                                 // Snark
+    ($65356, $4A),                                 // M249
+    ($299C9, $83, $C1, $EC),                       // Displacer
+    ($C525C, $4B),                                 // Sniper
+    ($C8F77, $48),                                 // Spore Launcher Primary
+    ($C9208, $48),                                 // Spore Launcher Secondary
+    ($C02E1, $49)                                  // Shock Roach
+  );
+
+  FOpCodeRapidFire: array [0..1] of array of LongWord =
+  (
+    ($A67F6, $74, $08),                            //Primary Fire
+    ($A6822, $74, $08)                             //Secondary Fire
+  );
+
+  j:Integer;
+  jj:integer;
+begin
+  SetLength(OpCodeInfAmmo,Length(FOpCodeInfAmmo));
+
+  for j:=0 to High(FOpCodeInfAmmo) do begin
+    SetLength(OpCodeInfAmmo[j],Length(FOpCodeInfAmmo[j]));
+    for jj:=0 to High(FOpCodeInfAmmo[j]) do begin
+      OpCodeInfAmmo[j,jj]:=FOpCodeInfAmmo[j,jj];
+    end;
+  end;
+
+  SetLength(OpCodeRapidFire,Length(FOpCodeRapidFire));
+
+  for j:=0 to High(FOpCodeRapidFire) do begin
+    SetLength(OpCodeRapidFire[j],Length(FOpCodeRapidFire[j]));
+    for jj:=0 to High(FOpCodeRapidFire[j]) do begin
+      OpCodeRapidFire[j,jj]:=FOpCodeRapidFire[j,jj];
+    end;
+  end;
+
+end;
+
+
+{
 constructor TgameOP.Create(g_ProcMem:TProcMem; dwOPFORBase:PDWORD);
 begin
   Self.dwOPFORBase:=dwOPFORBase;
@@ -41,7 +106,7 @@ end;
 function TgameOP.EnableInfiniteAmmo(State:Boolean): Boolean;
 begin
   Result:=False;
-  if Assigned(ProcMem) and dwOPFORBase^ > 0 then begin
+  if Assigned(ProcMem) and (dwOPFORBase^ > 0) then begin
     if State then begin
       //Opfor code goes here (ACTIVATE)
       ProcMem.WriteByte($90, dwOPFORBase^ + $5A177); //Pistol 9mm
@@ -139,5 +204,6 @@ begin
   end;
 end;
 
+}
 end.
 

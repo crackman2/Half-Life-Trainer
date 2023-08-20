@@ -89,7 +89,7 @@ uses
   StdCtrls, ExtCtrls, Windows, LCLIntf, Menus, strutils,
 
   { custom }
-  CProcMem, CgameHL, CgameOP, CgameBS;
+  CProcMem, CgameHL, CgameOP, CgameBS, CgameMM;
 
 type
 
@@ -203,6 +203,9 @@ var
   g_gameHL: TgameHL;
   g_gameOP: TgameOP;
   g_gameBS: TgameBS;
+  g_gameMM: TgameMM;
+
+  AntiCheckboxSpam:Boolean=False;
 
 const
   str_gameHL_error: string = 'g_gameHL not assigned!';
@@ -238,7 +241,7 @@ begin
   dwCLIENTBase := DWORD(g_ProcMem.GetModuleBaseAddress(dwProcessId, 'client.dll'));
   dwSDLBase := DWORD(g_ProcMem.GetModuleBaseAddress(dwProcessId, 'SDL2.dll'));
 
-  if (CurrentGame = 'h') or (CurrentGame = 'b') then
+  if (CurrentGame = 'h') or (CurrentGame = 'b') or (CurrentGame = 'm') then
   begin
     dwHLBase := DWORD(g_ProcMem.GetModuleBaseAddress(dwProcessId, 'hl.dll'));
   end
@@ -268,8 +271,8 @@ end;
 procedure TForm1.FormCreate(Sender: TObject);// ENTRYYYYYYYYY
 var
   GameFound: boolean = False;
-  GameList: array[0..2] of ansistring = ('Half-Life', 'Opposing Force', 'Blue Shift');
-  GameListCount: integer = 2;
+  GameList: array[0..3] of ansistring = ('Half-Life', 'Opposing Force', 'Blue Shift', 'Half-Life: MMod');
+  GameListCount: integer = 3;
   GameListLength: integer = 0;
   hProcessNonZero: boolean = False;
 begin
@@ -302,6 +305,10 @@ begin
     g_gameBS.Free;
     g_gameBS:=nil;
   end;
+   if Assigned(g_gameMM) then begin
+    g_gameMM.Free;
+    g_gameMM:=nil;
+  end;
 
 
 
@@ -311,7 +318,7 @@ begin
   {    waiting for the a listed game to s   tart                                }
   { -> when a game is found, g_ProcMem is created, where all the reading and }
   {    writing to memory and injection happens                               }
-  GameListLength := Length(GameList) - 1;
+  GameListLength := High(GameList);
   TimerGameStatus.Enabled := False;
 
   while not hProcessNonZero do
@@ -341,10 +348,10 @@ begin
       (GameListCount >= GameListLength) then
     begin
       Form1.LabelStatus.Caption :=
-        'Status: Game not found. Start Half-life or Opposing Force or Blue Shift!';
+        'Status: Game not found. Start Half-life or Opposing Force or Blue Shift or MMod!';
       Form1.LabelStatus.Font.Color := $0000DD;
       ShowMessage('Waiting for game...' + LineEnding +
-        'Click "OK" and start Half-Life or Opposing Force or Blue Shift' +
+        'Click "OK" and start Half-Life or Opposing Force or Blue Shift or MMod' +
         LineEnding + 'Half-Life Trainer will keep running and waiting for a game');
       GameFound := True;
     end;
@@ -382,6 +389,13 @@ begin
     Log('Blue Shift found!');
     g_gameBS := TgameBS.Create(g_ProcMem, @dwHLBase);
     Form1.LabelStatus.Caption := 'Status: Game found! Blue Shift';
+  end
+  else if GameListCount = 3 then
+  begin
+    CurrentGame := 'm';
+    Log('MMod found!');
+    g_gameMM := TgameMM.Create(g_ProcMem, @dwHLBase);
+    Form1.LabelStatus.Caption := 'Status: Game found! MMod';
   end;
 
   Form1.LabelStatus.Font.Color := $00DD00;
@@ -468,7 +482,9 @@ begin
   else if CurrentGame = 'o' then
     WinTitle := 'Opposing Force'
   else if CurrentGame = 'b' then
-    WinTitle := 'Blue Shift';
+    WinTitle := 'Blue Shift'
+  else if CurrentGame = 'm' then
+    WinTitle := 'Half-Life: MMod';
 
 
   HWCheck := g_ProcMem.GetModuleBaseAddress(dwProcessId, 'hw.dll');
@@ -558,6 +574,18 @@ begin
     if Assigned(g_gameBS) then
     begin
       if not g_gameBS.EnableInfiniteAmmo(CheckBoxInfAmmo.Checked) then
+        bFailedFunction := True;
+    end
+    else
+      bFailedObject := True;
+  end
+  else if CurrentGame = 'm' then
+  begin
+    if Assigned(g_gameMM) then
+    begin
+      if not g_gameMM.EnableInfiniteAmmo(CheckBoxInfAmmo.Checked) then
+        bFailedFunction := True;
+      if not g_gameMM.EnableCustomInfAmmo(CheckBoxInfAmmo.Checked) then
         bFailedFunction := True;
     end
     else
@@ -671,56 +699,71 @@ var
   bFailedFunction: boolean = False;
   bFailedObject: boolean = False;
 begin
-    if CurrentGame = 'h' then
-    begin
-      if Assigned(g_gameHL) then
+  if not AntiCheckboxSpam then begin
+    AntiCheckboxSpam:=True;
+      if CurrentGame = 'h' then
       begin
-        if not g_gameHL.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
-          bFailedFunction := True;
+        if Assigned(g_gameHL) then
+        begin
+          if not g_gameHL.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
+            bFailedFunction := True;
+        end
+        else
+          bFailedObject := True;
       end
-      else
-        bFailedObject := True;
-    end
-    else if CurrentGame = 'o' then
-    begin
-      if Assigned(g_gameOP) then
+      else if CurrentGame = 'o' then
       begin
-        if not g_gameOP.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
-          bFailedFunction := True;
+        if Assigned(g_gameOP) then
+        begin
+          if not g_gameOP.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
+            bFailedFunction := True;
+        end
+        else
+          bFailedObject := True;
       end
-      else
-        bFailedObject := True;
-    end
-    else if CurrentGame = 'b' then
-    begin
-      if Assigned(g_gameBS) then
+      else if CurrentGame = 'b' then
       begin
-        if not g_gameBS.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
-          bFailedFunction := True;
+        if Assigned(g_gameBS) then
+        begin
+          if not g_gameBS.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
+            bFailedFunction := True;
+        end
+        else
+          bFailedObject := True;
       end
-      else
-        bFailedObject := True;
-    end;
+      else if CurrentGame = 'm' then
+      begin
+        if Assigned(g_gameMM) then
+        begin
+          if not g_gameMM.EnableRapidFire(CheckBoxProperRapidfire.Checked) then
+            bFailedFunction := True;
+          if not g_gameMM.EnableCustomRapidfire(CheckBoxProperRapidfire.Checked) then bFailedFunction := True;
+        end
+        else
+          bFailedObject := True;
+      end;
 
-  if bFailedObject or bFailedFunction then
-  begin
-    if CheckBoxProperRapidfire.Checked then
-    Log('Can''t RapidFire in main menu');
-
-
-    CheckBoxProperRapidfire.Checked := False;
-
-    {
-    if bFailedObject then
+    if bFailedObject or bFailedFunction then
     begin
-      Log('Obj:' + CurrentGame + ' missing');
-    end;
+      if CheckBoxProperRapidfire.Checked then
+      Log('Can''t RapidFire in main menu');
 
-    if bFailedFunction then
-    begin
-      Log('Func:' + CurrentGame + ' failed');
+
+      CheckBoxProperRapidfire.Checked := False;
+
+
+      if bFailedObject then
+      begin
+        Log('Obj:' + CurrentGame + ' missing');
+      end;
+
+      if bFailedFunction then
+      begin
+        Log('Func:' + CurrentGame + ' failed');
+      end;
+
     end;
-    }
+    AntiCheckboxSpam:=False;
   end;
 
 end;
@@ -834,44 +877,49 @@ end;
 {    (which is controlled by the appropriate checkboxes)                     }
 procedure TForm1.TimerRegenTimer(Sender: TObject);
 begin
-  if Assigned(g_ProcMem) then
-  begin
-    { ------------------------ Read Current HP & AP ------------------------ }
-    LocalPlayer.fHP := g_ProcMem.ReadFloat(LocalPlayer.dwAddHP);
-    LocalPlayer.fAP := g_ProcMem.ReadFloat(LocalPlayer.dwAddAP);
+  if not AntiCheckboxSpam then begin
+    AntiCheckboxSpam:=True;
 
-    { ---------------------------- Regenerate HP --------------------------- }
-    if CheckBoxEnableHPRegen.Checked and (LocalPlayer.fHP <>
-      StrToInt(EditMaxHP.Text)) then
-      if ((LocalPlayer.fHP + (LocalPlayer.fHPRate)) <=
-        single(TrackBarMaxHP.Position + 1)) then
-      begin
-        LocalPlayer.fHP := LocalPlayer.fHP + LocalPlayer.fHPRate;
-        g_ProcMem.WriteFloat(LocalPlayer.fHP, LocalPlayer.dwAddHP);
-      end
-      else if ((LocalPlayer.fHP - (LocalPlayer.fHPRate)) >=
-        single(TrackBarMaxHP.Position)) then
-      begin
-        LocalPlayer.fHP := LocalPlayer.fHP - LocalPlayer.fHPRate;
-        g_ProcMem.WriteFloat(LocalPlayer.fHP, LocalPlayer.dwAddHP);
-      end;
+    if Assigned(g_ProcMem) then
+    begin
+      { ------------------------ Read Current HP & AP ------------------------ }
+      LocalPlayer.fHP := g_ProcMem.ReadFloat(LocalPlayer.dwAddHP);
+      LocalPlayer.fAP := g_ProcMem.ReadFloat(LocalPlayer.dwAddAP);
+
+      { ---------------------------- Regenerate HP --------------------------- }
+      if CheckBoxEnableHPRegen.Checked and (LocalPlayer.fHP <>
+        StrToInt(EditMaxHP.Text)) then
+        if ((LocalPlayer.fHP + (LocalPlayer.fHPRate)) <=
+          single(TrackBarMaxHP.Position + 1)) then
+        begin
+          LocalPlayer.fHP := LocalPlayer.fHP + LocalPlayer.fHPRate;
+          g_ProcMem.WriteFloat(LocalPlayer.fHP, LocalPlayer.dwAddHP);
+        end
+        else if ((LocalPlayer.fHP - (LocalPlayer.fHPRate)) >=
+          single(TrackBarMaxHP.Position)) then
+        begin
+          LocalPlayer.fHP := LocalPlayer.fHP - LocalPlayer.fHPRate;
+          g_ProcMem.WriteFloat(LocalPlayer.fHP, LocalPlayer.dwAddHP);
+        end;
 
 
-    { ---------------------------- Regenerate AP --------------------------- }
-    if CheckBoxEnableAPRegen.Checked and (LocalPlayer.fAP <>
-      StrToInt(EditMaxAP.Text)) then
-      if ((LocalPlayer.fAP + (LocalPlayer.fAPRate)) <=
-        single(TrackBarMaxAP.Position + 1)) then
-      begin
-        LocalPlayer.fAP := LocalPlayer.fAP + LocalPlayer.fAPRate;
-        g_ProcMem.WriteFloat(LocalPlayer.fAP, LocalPlayer.dwAddAP);
-      end
-      else if ((LocalPlayer.fAP - (LocalPlayer.fAPRate)) >=
-        single(TrackBarMaxAP.Position)) then
-      begin
-        LocalPlayer.fAP := LocalPlayer.fAP - LocalPlayer.fAPRate;
-        g_ProcMem.WriteFloat(LocalPlayer.fAP, LocalPlayer.dwAddAP);
-      end;
+      { ---------------------------- Regenerate AP --------------------------- }
+      if CheckBoxEnableAPRegen.Checked and (LocalPlayer.fAP <>
+        StrToInt(EditMaxAP.Text)) then
+        if ((LocalPlayer.fAP + (LocalPlayer.fAPRate)) <=
+          single(TrackBarMaxAP.Position + 1)) then
+        begin
+          LocalPlayer.fAP := LocalPlayer.fAP + LocalPlayer.fAPRate;
+          g_ProcMem.WriteFloat(LocalPlayer.fAP, LocalPlayer.dwAddAP);
+        end
+        else if ((LocalPlayer.fAP - (LocalPlayer.fAPRate)) >=
+          single(TrackBarMaxAP.Position)) then
+        begin
+          LocalPlayer.fAP := LocalPlayer.fAP - LocalPlayer.fAPRate;
+          g_ProcMem.WriteFloat(LocalPlayer.fAP, LocalPlayer.dwAddAP);
+        end;
+    end;
+    AntiCheckboxSpam:=False;
   end;
 end;
 

@@ -21,6 +21,7 @@ type
     function GetModuleBaseAddress(hProcID: cardinal; lpModName: PChar): Pointer;
     function InjectDll(FullPath:String): Boolean;
     function IsDllLoadedInProcess(const DllName: string): Boolean;
+    function ChangePageProtection(Address:DWORD; Size:DWORD; Protection:DWORD): Boolean;
   public
     hProcess:HANDLE;
     dwProcessId:DWORD;
@@ -42,7 +43,9 @@ end;
 
 procedure TProcMem.WriteByte(Value: byte; Address: DWORD);
 begin
-  WriteProcessMemory(hProcess, Pointer(Address), @Value, sizeof(Value), nil);
+  if (WriteProcessMemory(hProcess, Pointer(Address), @Value, sizeof(Value), nil) <> False) then begin
+   // ShowMessage('WriteByte failure: Address' + IntToHex(Address,8));
+  end;
 end;
 
 function TProcMem.ReadByte(Address: DWORD):Byte;
@@ -199,6 +202,15 @@ begin
 
   CloseHandle(hSnapshot);
 end;
+
+
+function TProcMem.ChangePageProtection(Address:DWORD; Size:DWORD; Protection:DWORD): Boolean;
+var
+  Trash:PDWORD;
+begin
+     Result:= VirtualProtectEx(hProcess,Pointer(Address),Size, Protection,Trash);
+end;
+
 
 
 end.
