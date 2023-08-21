@@ -17,6 +17,8 @@ type
   TgameMM = class (Tgame)
     function EnableCustomRapidfire(State:Boolean): Boolean;
     function EnableCustomInfAmmo(State:Boolean): Boolean;
+    function ValueUpdater_InfAmmo(): Boolean;
+
     private
       procedure SplitAndReverse(DWORDValue: LongWord; var ByteArray: array of Byte);
     protected
@@ -33,21 +35,37 @@ const
   DataPistolPrimaryRapidFire: array [0..1] of array of LongWord =
   (
     ($CFDCD, $0F, $84, $99, $00, $00, $00),  //Original
-
     ($CFDCD, $90, $90, $90, $90, $90, $90)  //Modified
   );
 
   DataSatchelSecondaryRapidFire: array [0..1] of array of LongWord =
   (
     ($CE0E7, $74, $53),  //Original
-
     ($CE0E7, $90, $90)  //Modified
   );
 
+  DataGaussPrimaryRapidFire: array [0..1] of array of LongWord =    //SMG Grenades
+  (
+    ($4DBB1, $C7, $80, $50, $02, $00, $00, $CD, $CC, $4C, $3E), //Original
+    ($4DBB1, $90, $90, $90, $90, $90, $90, $90, $90, $90, $90)  //Modified
+  );
+
+
+
   DataHornetClientInfAmmo: array [0..1] of array of LongWord =
   (
-    ($3514, $89, $04, $8D, $10, $B9, $6E, $6C),  //Original
+    ($3514, $89, $04, $8D, $10, $B9, $6E, $6C),  //Original (separate because of client.dll)
     ($3514, $90, $90, $90, $90, $90, $90, $90)   //Modified
+  );
+
+  { -------------------- DataHornetCustomInfAmmo -------------------- }
+  { -> offset in relation to hl.dll                                   }
+  { -> the hornet gun is weird. this is my attempt at giving it       }
+  {    infinite ammo without breaking it                              }
+  DataHornetCustomInfAmmo: array [0..1] of array of LongWord =
+  (
+    ($93DA0, $89, $43, $3C, $5B, $C3, $CC, $CC, $CC, $CC),  //Original
+    ($93DA0, $C7, $43, $3C, $08, $00, $00, $00, $5B, $C3)   //Modified
   );
 
 
@@ -55,7 +73,7 @@ implementation
 
 procedure TgameMM.InitializeOpCodes;
 var
-  FOpCodeInfAmmo: array[0..17] of array of LongWord =
+  FOpCodeInfAmmo: array[0..16] of array of LongWord =
   (
     ($CFF60, $48),                                    //Pistol 9mm
     ($9CCEB, $FF, $8F, $A0, $00, $00, $00),           //Magnum
@@ -69,7 +87,7 @@ var
     ($4DDCB, $FF, $8C, $88, $04, $05, $00, $00),      //Gauss secondary 1
     ($4DF26, $FF, $8C, $8A, $04, $05, $00, $00),      //Gauss secondary 2
     ($3D166, $89, $88, $04, $05, $00, $00),           //Egon
-    ($93DA0, $89, $43, $3C),                          //Hornet
+    //($93DA0, $89, $43, $3C),                        //Hornet (excluded, see above)
     ($2FEE0, $83, $84, $90, $04, $05, $00, $00, $F6), //BFG
     ($55512, $FF, $8C, $88, $04, $05, $00, $00),      //Grenades
     ($A19E2, $FF, $8C, $88, $04, $05, $00, $00),      //Satchels
@@ -116,10 +134,8 @@ begin
   if Assigned(ProcMem) and (dwModuleBase^ > 0) then begin
       dwTempBase:=dwModuleBase^;
 
-
-
       if State then begin
-        { ---- SMG Grenades ON ---- }
+        { ------- SMG Grenades ON ------- }
         dwTempBase+=$11; //hl.dll + 0x11 -> points to a location that has the value 0.0f
         SplitAndReverse(dwTempBase,dwModuleBytes);
 
@@ -131,21 +147,30 @@ begin
           ProcMem.WriteByte(DataSMGRapidFire[1,1 + i] , dwModuleBase^ + DataSMGRapidFire[1,0] + i);
         end;
 
-
-        { ---- Pistol Primary ON ---- }
+        { ------ Pistol Primary ON ------ }
         for i:=0 to High(DataPistolPrimaryRapidFire[1])-1 do begin
           ProcMem.WriteByte(DataPistolPrimaryRapidFire[1,1 + i] , dwModuleBase^ + DataPistolPrimaryRapidFire[1,0] + i);
         end;
 
-        { ---- Satchel Secondary ON ---- }
+        { ----- Satchel Secondary ON ---- }
         for i:=0 to High(DataSatchelSecondaryRapidFire[1])-1 do begin
           ProcMem.WriteByte(DataSatchelSecondaryRapidFire[1,1 + i] , dwModuleBase^ + DataSatchelSecondaryRapidFire[1,0] + i);
+        end;
+
+        { -------- Hornet gun ON -------- }
+        for i:=0 to High(DataHornetCustomInfAmmo[1])-1 do begin
+          ProcMem.WriteByte(DataHornetCustomInfAmmo[1,1 + i] , dwModuleBase^ + DataHornetCustomInfAmmo[1,0] + i);
+        end;
+
+        { ------- Gauss primary ON ------ }
+        for i:=0 to High(DataHornetCustomInfAmmo[1])-1 do begin
+          ProcMem.WriteByte(DataHornetCustomInfAmmo[1,1 + i] , dwModuleBase^ + DataHornetCustomInfAmmo[1,0] + i);
         end;
 
 
 
       end else begin
-        { ---- SMG Grenades OFF --- }   +
+        { ------- SMG Grenades OFF ------ }   +
         dwTempBase+=$1262A8; //hl.dll + 0x1262A8 -> points to a location that has the original value
         SplitAndReverse(dwTempBase,dwModuleBytes);
 
@@ -157,8 +182,7 @@ begin
           ProcMem.WriteByte(DataSMGRapidFire[0,1 + i],  dwModuleBase^ + DataSMGRapidFire[0,0] + i);
         end;
 
-
-        { ---- Pistol Primary OFF ---- }
+        { ------ Pistol Primary OFF ----- }
         for i:=0 to High(DataPistolPrimaryRapidFire[0])-1 do begin
           ProcMem.WriteByte(DataPistolPrimaryRapidFire[0,1 + i] , dwModuleBase^ + DataPistolPrimaryRapidFire[0,0] + i);
         end;
@@ -166,6 +190,11 @@ begin
         { ---- Satchel Secondary OFF ---- }
         for i:=0 to High(DataSatchelSecondaryRapidFire[0])-1 do begin
           ProcMem.WriteByte(DataSatchelSecondaryRapidFire[0,1 + i] , dwModuleBase^ + DataSatchelSecondaryRapidFire[0,0] + i);
+        end;
+
+        { -------- Hornet gun OFF ------- }
+        for i:=0 to High(DataHornetCustomInfAmmo[0])-1 do begin
+          ProcMem.WriteByte(DataHornetCustomInfAmmo[0,1 + i] , dwModuleBase^ + DataHornetCustomInfAmmo[0,0] + i);
         end;
 
       end;
@@ -177,6 +206,7 @@ end;
 function TgameMM.EnableCustomInfAmmo(State:Boolean): Boolean;
 var
   dwClientBase:DWORD=0;
+  i:Cardinal;
 begin
   Result:=False;
   if Assigned(ProcMem) then begin
@@ -186,11 +216,13 @@ begin
         for i:=0 to High(DataHornetClientInfAmmo[1])-1 do begin
           ProcMem.WriteByte(DataHornetClientInfAmmo[1,1 + i] , dwClientBase + DataHornetClientInfAmmo[1,0] + i);
         end;
+
         Result:=True;
       end else begin
         for i:=0 to High(DataHornetClientInfAmmo[0])-1 do begin
           ProcMem.WriteByte(DataHornetClientInfAmmo[0,1 + i] , dwClientBase + DataHornetClientInfAmmo[0,0] + i);
         end;
+
         Result:=True;
       end;
     end;
@@ -205,6 +237,37 @@ begin
   begin
     ByteArray[i] := DWORDValue and $FF;
     DWORDValue := DWORDValue shr 8;
+  end;
+end;
+
+
+{ -------------------------- ValueUpdater_InfAmmo -------------------------- }
+{ -> sometimes when the player dies while infinite ammo is active, all guns' }
+{    ammo is reset to 0 or something and cannot be selected anymore.         }
+{ -> the values need to be overwritten with a positive value to make the guns}
+{    equippable again. to fix this I created a timer that runs and executes  }
+{ -> this function every 2 seconds. It overwrites the display value of the   }
+{    ammo of the affected guns so they can be selected again                 }
+function TgameMM.ValueUpdater_InfAmmo(): Boolean;
+var
+  dwClientBase:DWORD=0;
+begin
+  Result:=False;
+  if Assigned(ProcMem) then begin
+    dwClientBase:=DWORD(ProcMem.GetModuleBaseAddress(ProcMem.dwProcessId,'client.dll'));
+    if dwClientBase <> 0 then begin
+        { --- Gauss/Egon/BFG --- }
+        ProcMem.WriteDword(100,dwClientBase + $10B924);
+        { ------- Hornet ------- }
+        ProcMem.WriteDword(8,dwClientBase + $10B940);
+        { ----- Handgrenade ---- }
+        ProcMem.WriteDword(10,dwClientBase + $10B938);
+        { ------ Tripmines ----- }
+        ProcMem.WriteDword(5,dwClientBase + $10B930);
+        { ------- Snarks ------- }
+        ProcMem.WriteDword(5,dwClientBase + $10B93C);
+        Result:=True;
+    end;
   end;
 end;
 
@@ -258,6 +321,10 @@ end.
 
     { ---- Satchel secondary ---- }
     hl.dll+CE0E7 - 74 53                 - je hl.dll+CE13C
+
+    { ------ Gauss primary ------ }
+    hl.dll+4DBB1 - C7 80 50020000 CDCC4C3E - mov [eax+00000250],3E4CCCCD
+
 
 
 

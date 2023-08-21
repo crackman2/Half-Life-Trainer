@@ -100,10 +100,14 @@
       <RelocatableUnit Value="True"/>
       <TargetCPU Value="i386"/>
       <Optimizations>
-        <OptimizationLevel Value="0"/>
+        <OptimizationLevel Value="3"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+        <StripSymbols Value="True"/>
+      </Debugging>
       <LinkSmart Value="True"/>
       <Options>
         <Win32>
@@ -113,7 +117,7 @@
     </Linking>
     <Other>
       <CompilerMessages>
-        <IgnoredMessages idx4055="True" idx2005="True"/>
+        <IgnoredMessages idx4079="True" idx4055="True" idx2005="True"/>
       </CompilerMessages>
     </Other>
   </CompilerOptions>

@@ -24,6 +24,7 @@ type
       dwOPFORBase:PDWORD;
     private
     }
+    protected
     procedure InitializeOpCodes; override;
   end;
 

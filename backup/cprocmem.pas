@@ -12,8 +12,9 @@ type
     constructor Create(dwProcessId:DWORD);
     procedure WriteFloat(Value: single; Address: DWORD);
     procedure WriteByte(Value: byte; Address: DWORD);
-    function ReadByte(Address: DWORD):Byte;
     procedure WriteWord(Value: Word; Address: DWORD);
+    procedure WriteDword(Value: Dword; Address: DWORD);
+    function ReadByte(Address: DWORD):Byte;
     function ReadWord(Address: DWORD):Word;
     function ReadFloat(Address: DWORD): single;
     function ReadDword(Address: DWORD): DWORD;
@@ -44,7 +45,7 @@ end;
 procedure TProcMem.WriteByte(Value: byte; Address: DWORD);
 begin
   if (WriteProcessMemory(hProcess, Pointer(Address), @Value, sizeof(Value), nil) <> False) then begin
-    ShowMessage('WriteByte failure: Address' + IntToHex(Address,8));
+   // ShowMessage('WriteByte failure: Address' + IntToHex(Address,8));
   end;
 end;
 
@@ -54,6 +55,11 @@ begin
 end;
 
 procedure TProcMem.WriteWord(Value: Word; Address: DWORD);
+begin
+  WriteProcessMemory(hProcess, Pointer(Address), @Value, sizeof(Value), nil);
+end;
+
+procedure TProcMem.WriteDword(Value: Dword; Address: DWORD);
 begin
   WriteProcessMemory(hProcess, Pointer(Address), @Value, sizeof(Value), nil);
 end;
@@ -208,6 +214,7 @@ function TProcMem.ChangePageProtection(Address:DWORD; Size:DWORD; Protection:DWO
 var
   Trash:PDWORD;
 begin
+     Trash^:=0;
      Result:= VirtualProtectEx(hProcess,Pointer(Address),Size, Protection,Trash);
 end;
 

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 434
+  Left = 709
   Height = 533
-  Top = 193
+  Top = 215
   Width = 233
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
@@ -2283,5 +2283,11 @@ object Form1: TForm1
         OnClick = MenuItemInjectClick
       end
     end
+  end
+  object TimerValueUpdater: TTimer
+    Interval = 2000
+    OnTimer = TimerValueUpdaterTimer
+    Left = 152
+    Top = 247
   end
 end

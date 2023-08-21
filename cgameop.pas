@@ -9,10 +9,10 @@ unit CgameOP;
 interface
 
 uses
-  Classes, SysUtils, Dialogs, Windows,
+  Classes, SysUtils, Dialogs,
 
   { custom }
-  Cgame, CProcMem;
+  Cgame;
 type
   TgameOP = class (Tgame)
     {

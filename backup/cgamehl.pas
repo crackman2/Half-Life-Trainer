@@ -9,7 +9,7 @@ unit CgameHL;
 interface
 
 uses
-  Classes, SysUtils, Dialogs, Windows,
+  Classes, SysUtils, Dialogs,
 
   { custom }
   Cgame, CProcMem;
@@ -53,12 +53,10 @@ var
     ($30264, $49)                          //Gauss Right click
   );
 
-  FOpCodeRapidFire: array [0..3] of array of LongWord =
+  FOpCodeRapidFire: array [0..1] of array of LongWord =
   (
-    ($63318, $74),                         //Primary Fire
-    ($63319, $08),
-    ($63344, $74),                         //Secondary Fire
-    ($63345, $08)
+    ($63318, $74, $08),                         //Primary Fire
+    ($63344, $74, $08)                          //Secondary Fire
   );
 
   j:Integer;

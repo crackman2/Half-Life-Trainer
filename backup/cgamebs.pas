@@ -34,7 +34,7 @@ implementation
 
 procedure TgameBS.InitializeOpCodes;
 var
-  FOpCodeInfAmmo: array[0..24] of array of LongWord =
+  FOpCodeInfAmmo: array[0..17] of array of LongWord =
   (
     ($3A425, $48),                                 // Pistol 9mm
     ($6D6C3, $4A),                                 // 357 Magnum

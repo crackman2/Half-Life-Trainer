@@ -123,6 +123,7 @@ type
     MainMenuBar: TMainMenu;
     MenuItemMore: TMenuItem;
     MenuItemInject: TMenuItem;
+    TimerValueUpdater: TTimer;
     TimerBhop: TTimer;
     TimerGameStatus: TTimer;
     TimerEditRegenCheck: TTimer;
@@ -146,6 +147,7 @@ type
     procedure TimerGameStatusTimer(Sender: TObject);
     procedure TimerEditRegenCheckTimer(Sender: TObject);
     procedure TimerRegenTimer(Sender: TObject);
+    procedure TimerValueUpdaterTimer(Sender: TObject);
     procedure TrackBarAPRateChange(Sender: TObject);
     procedure TrackBarHPRateChange(Sender: TObject);
     procedure TrackBarMaxAPChange(Sender: TObject);
@@ -268,11 +270,12 @@ end;
 { -> used for initialization/reinitialization                                }
 { -> resetting controls, freeing objects, finding the game, creating objects }
 {    etc.                                                                    }
+{ -> Half-Life: Uplink is the one that comes with MMod                       }
 procedure TForm1.FormCreate(Sender: TObject);// ENTRYYYYYYYYY
 var
   GameFound: boolean = False;
-  GameList: array[0..3] of ansistring = ('Half-Life', 'Opposing Force', 'Blue Shift', 'Half-Life: MMod');
-  GameListCount: integer = 3;
+  GameList: array[0..5] of ansistring = ('Half-Life', 'Opposing Force', 'Blue Shift', 'Half-Life: MMod', 'Half-Life: Uplink', 'USS Darkstar');
+  GameListCount: integer = 5;
   GameListLength: integer = 0;
   hProcessNonZero: boolean = False;
 begin
@@ -390,7 +393,7 @@ begin
     g_gameBS := TgameBS.Create(g_ProcMem, @dwHLBase);
     Form1.LabelStatus.Caption := 'Status: Game found! Blue Shift';
   end
-  else if GameListCount = 3 then
+  else if (GameListCount = 3) or (GameListCount = 4) or (GameListCount = 5) then
   begin
     CurrentGame := 'm';
     Log('MMod found!');
@@ -474,22 +477,44 @@ end;
 { -> checks if the game is still running and changes the label if it is not  }
 procedure TForm1.TimerGameStatusTimer(Sender: TObject);
 var
-  WinTitle: PChar = '';
+  WinTitle: array of PChar;
+  CandidateHWND:HWND=0;
+  HWNDResult:Boolean=False;
   HWCheck: Pointer = nil;
+  i:Cardinal;
 begin
-  if CurrentGame = 'h' then
-    WinTitle := 'Half-Life'
-  else if CurrentGame = 'o' then
-    WinTitle := 'Opposing Force'
-  else if CurrentGame = 'b' then
-    WinTitle := 'Blue Shift'
-  else if CurrentGame = 'm' then
-    WinTitle := 'Half-Life: MMod';
+  if CurrentGame = 'h' then begin
+    SetLength(WinTitle,1);
+    WinTitle[0] := 'Half-Life'
+  end
+  else if CurrentGame = 'o' then begin
+    SetLength(WinTitle,1);
+    WinTitle[0] := 'Opposing Force'
+  end
+  else if CurrentGame = 'b' then begin
+    SetLength(WinTitle,1);
+    WinTitle[0] := 'Blue Shift'
+  end
+  else if CurrentGame = 'm' then begin
+    SetLength(WinTitle,3);
+    WinTitle[0] := 'Half-Life: MMod';
+    WinTitle[1] := 'Half-Life: Uplink';
+    WinTitle[2] := 'USS Darkstar';
+  end else begin
+    SetLength(WinTitle,1);
+    WinTitle[0]:='';
+  end;
 
 
   HWCheck := g_ProcMem.GetModuleBaseAddress(dwProcessId, 'hw.dll');
 
-  if (FindWindow(nil, WinTitle) = 0) or (HWCheck = Pointer(1)) then
+  for i:=0 to High(WinTitle) do begin
+      CandidateHWND:= FindWindow(nil, WinTitle[i]);
+      if CandidateHWND <> 0 then HWNDResult:=True;
+  end;
+
+
+  if (not HWNDResult) or (HWCheck = Pointer(1)) then
   begin
     Form1.LabelStatus.Caption :=
       'Status: Game not running!' + LineEnding + 'Click ''Reinitialize''';
@@ -595,7 +620,7 @@ begin
   if bFailedObject or bFailedFunction then
   begin
     if CheckBoxInfAmmo.Checked then
-    Log('Can''t InfAmmo in main menu');
+    Log('Infinite Ammo failed. Try again!');
 
     CheckBoxInfAmmo.Checked:=False;
     {
@@ -746,12 +771,12 @@ begin
     if bFailedObject or bFailedFunction then
     begin
       if CheckBoxProperRapidfire.Checked then
-      Log('Can''t RapidFire in main menu');
+      Log('Rapidfire failed. Try again!');
 
 
       CheckBoxProperRapidfire.Checked := False;
 
-
+      {
       if bFailedObject then
       begin
         Log('Obj:' + CurrentGame + ' missing');
@@ -761,6 +786,7 @@ begin
       begin
         Log('Func:' + CurrentGame + ' failed');
       end;
+      }
 
     end;
     AntiCheckboxSpam:=False;
@@ -810,12 +836,18 @@ end;
 {    messagebox, but it is a pain to change.                                 }
 procedure TForm1.ButtonHelpClick(Sender: TObject);
 begin
-  ShowMessage('Half-Life Trainer v1.4' + sLineBreak + 'by pombenenge (on YouTube)' +
-    sLineBreak + 'Last Updated: 2023-08-19' + sLineBreak + sLineBreak +
-    'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo, AutoBhop' +
-    sLineBreak + sLineBreak + 'WARNING: The trainer may cause crashes. Save often.' +
-    sLineBreak + sLineBreak + '-- How to use --' + sLineBreak +
-    '1. Start Half-life, Opposing Force or Blue Shift (Tested on Steam version, other versions probably don''t work)'
+  ShowMessage('Half-Life Trainer v1.4' + sLineBreak +
+              'by pombenenge (on YouTube)' +sLineBreak +
+               'Last Updated: 2023-08-21' + sLineBreak
+               + sLineBreak +
+               'Features: Health and Armor regeneration, Rapidfire, Infinite Ammo, AutoBhop' + sLineBreak
+               + sLineBreak +
+               'WARNING: The trainer may cause crashes. Save often.' + sLineBreak
+               + sLineBreak +
+               'Compatible games: Half-Life, Opposing Force, Blue Shift, MMod (current Steam versions for all)' + sLineBreak
+               + sLineBreak +
+               '-- How to use --' + sLineBreak +
+    '1. Start the game'
     + sLineBreak +
     '2. Start the trainer (If the trainer is already running, click on "Reinitialize")' +
     sLineBreak + '3. Adjust trainer settings to your liking.' +
@@ -920,6 +952,13 @@ begin
         end;
     end;
     AntiCheckboxSpam:=False;
+  end;
+end;
+
+procedure TForm1.TimerValueUpdaterTimer(Sender: TObject);
+begin
+  if Assigned(g_gameMM) and CheckBoxInfAmmo.Checked then begin
+    {if not} g_gameMM.ValueUpdater_InfAmmo() {then Log('Value Update failed')};
   end;
 end;
 

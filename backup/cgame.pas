@@ -22,7 +22,6 @@ type
     protected
       { --- is defined in subclass --- }
       procedure InitializeOpCodes; virtual; abstract;
-      procedure CustomWrite(Data:array of array of LongWord); virtual; abstract;
   end;
 
 var
@@ -42,8 +41,8 @@ end;
 
 function Tgame.EnableInfiniteAmmo(State:Boolean): Boolean;
 var
-  i:Cardinal=0;
-  ii:Cardinal=0;
+  i:DWORD=0;
+  ii:DWORD=0;
 begin
   Result:=False;
   if Assigned(ProcMem) and (dwModuleBase^ > 0) then begin
@@ -51,7 +50,7 @@ begin
 
       for i := 0 to High(OpCodeInfAmmo) do begin
         for ii:=1 to High(OpCodeInfAmmo[i]) do begin
-          ProcMem.WriteByte($90, dwModuleBase^ + OpCodeInfAmmo[i,0] + ii-1);
+          ProcMem.WriteByte($90, dwModuleBase^ + OpCodeInfAmmo[i,0] + ii - 1);
         end;
       end;
 
@@ -60,7 +59,7 @@ begin
 
       for i := 0 to High(OpCodeInfAmmo) do begin
         for ii:=1 to High(OpCodeInfAmmo[i]) do begin
-          ProcMem.WriteByte(OpCodeInfAmmo[i,ii], dwModuleBase^ + OpCodeInfAmmo[i,0] + ii-1);
+          ProcMem.WriteByte(OpCodeInfAmmo[i,ii], dwModuleBase^ + OpCodeInfAmmo[i,0] + ii - 1);
         end;
       end;
 

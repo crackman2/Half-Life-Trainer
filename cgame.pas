@@ -50,7 +50,7 @@ begin
 
       for i := 0 to High(OpCodeInfAmmo) do begin
         for ii:=1 to High(OpCodeInfAmmo[i]) do begin
-          ProcMem.WriteByte($90, dwModuleBase^ + OpCodeInfAmmo[i,0] + ii-1);
+          ProcMem.WriteByte($90, dwModuleBase^ + OpCodeInfAmmo[i,0] + ii - 1);
         end;
       end;
 
@@ -59,7 +59,7 @@ begin
 
       for i := 0 to High(OpCodeInfAmmo) do begin
         for ii:=1 to High(OpCodeInfAmmo[i]) do begin
-          ProcMem.WriteByte(OpCodeInfAmmo[i,ii], dwModuleBase^ + OpCodeInfAmmo[i,0] + ii-1);
+          ProcMem.WriteByte(OpCodeInfAmmo[i,ii], dwModuleBase^ + OpCodeInfAmmo[i,0] + ii - 1);
         end;
       end;
 

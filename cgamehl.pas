@@ -9,10 +9,10 @@ unit CgameHL;
 interface
 
 uses
-  Classes, SysUtils, Dialogs, Windows,
+  Classes, SysUtils, Dialogs,
 
   { custom }
-  Cgame, CProcMem;
+  Cgame;
 type
   TgameHL = class (Tgame)
     {constructor Create(g_ProcMem:TProcMem; dwHLBase:PDWORD);
